@@ -97,9 +97,28 @@ public sealed class MonthlyReportImportsController : ControllerBase
     {
         try
         {
-            var report = await _reportContentExtractor.ExtractAsync(request.File, cancellationToken);
+            if (request.File.Length == 0 || request.File.Length > 8 * 1024 * 1024)
+            {
+                throw new InvalidOperationException("CSV file must contain data and be 8 MB or smaller.");
+            }
+
+            var contentType = request.File.ContentType.Split(';')[0].Trim();
+            if (!Path.GetExtension(request.File.FileName).Equals(".csv", StringComparison.OrdinalIgnoreCase)
+                || !(string.IsNullOrEmpty(contentType)
+                    || contentType.Equals("text/csv", StringComparison.OrdinalIgnoreCase)
+                    || contentType.Equals("application/vnd.ms-excel", StringComparison.OrdinalIgnoreCase)
+                    || contentType.Equals("application/octet-stream", StringComparison.OrdinalIgnoreCase)
+                    || contentType.Equals("text/plain", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException("CSV preview requires a CSV file.");
+            }
+
+            // Parse the original CSV directly; AI report normalization loses delimiters.
+            await using var stream = request.File.OpenReadStream();
+            using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            var csvContent = await reader.ReadToEndAsync(cancellationToken);
             var drafts = _csvBankImportMapper.Map(
-                report.Content,
+                csvContent,
                 request.AccountId,
                 request.DateColumn,
                 request.AmountColumn,

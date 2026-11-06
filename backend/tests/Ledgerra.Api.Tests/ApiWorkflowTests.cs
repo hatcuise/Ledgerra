@@ -1378,6 +1378,51 @@ public sealed class ApiWorkflowTests : IClassFixture<LedgerraApiFactory>
         Assert.Equal(0, transactionsPayload.GetArrayLength());
     }
 
+    [Theory]
+    [InlineData("SAINT NEKTARIOS GREEK 607-498-5285 NY3000089192230031772899", "text/csv")]
+    [InlineData("Bank export", "application/vnd.ms-excel")]
+    [InlineData("Bank export", "application/octet-stream")]
+    [InlineData("Bank export", "text/plain")]
+    [InlineData("\"Market, downtown | groceries\"", "text/csv")]
+    public async Task CsvPreview_PreservesOriginalCsvHeadersAndQuotedCells(string memo, string contentType)
+    {
+        using var client = _factory.CreateClient();
+        var auth = await RegisterAndAuthenticateAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+        var accountId = await CreateAccountAsync(client, "CSV Checking", "Checking", 0m);
+
+        using var form = new MultipartFormDataContent();
+        form.Add(new StringContent(accountId.ToString()), "accountId");
+        form.Add(new StringContent("date"), "dateColumn");
+        form.Add(new StringContent("Amount"), "amountColumn");
+        form.Add(new StringContent("memo"), "descriptionColumn");
+        using var file = new ByteArrayContent(Encoding.UTF8.GetBytes(
+            $"date,payment,number,payee,memo,Amount,Category,tags\n3/7/2026,,,Payee,{memo},133,Services,\n"));
+        file.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        form.Add(file, "file", "statement.csv");
+
+        var response = await client.PostAsync("/api/imports/monthly-report/csv-preview", form);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var transaction = Assert.Single(payload.GetProperty("transactions").EnumerateArray());
+        Assert.Equal(133m, transaction.GetProperty("amount").GetDecimal());
+        Assert.Equal("Income", transaction.GetProperty("type").GetString());
+        Assert.Equal("2026-03-07", transaction.GetProperty("occurredOnUtc").GetString()![..10]);
+        Assert.Equal(memo.Trim('"'), transaction.GetProperty("note").GetString());
+
+        // CSV preview and commit must work without configuring an AI provider.
+        var commit = await client.PostAsJsonAsync("/api/imports/monthly-report/commit", new
+        {
+            transactions = new[] { transaction }
+        });
+        Assert.Equal(HttpStatusCode.Created, commit.StatusCode);
+        var saved = await commit.Content.ReadFromJsonAsync<JsonElement>();
+        var created = Assert.Single(saved.GetProperty("created").EnumerateArray());
+        Assert.Equal(accountId, created.GetProperty("accountId").GetGuid());
+        Assert.Equal(133m, created.GetProperty("amount").GetDecimal());
+        Assert.Equal(memo.Trim('"'), created.GetProperty("note").GetString());
+    }
+
     [Fact]
     public async Task AuthenticatedUser_CanAnalyzeCsvMonthlyReportIntoDrafts()
     {
