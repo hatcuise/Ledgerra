@@ -5,7 +5,7 @@ namespace Ledgerra.Api.Services.Imports;
 
 public sealed class CsvBankImportMapper
 {
-    public IReadOnlyList<AnalyzedMonthlyReportDraft> Map(string csvContent, Guid accountId, string dateColumn, string amountColumn, string? descriptionColumn)
+    public IReadOnlyList<AnalyzedMonthlyReportDraft> Map(string csvContent, Guid accountId, string dateColumn, string amountColumn, string? descriptionColumn, bool invertAmounts = false)
     {
         var rows = Parse(csvContent);
         if (rows.Count < 2)
@@ -37,6 +37,11 @@ public sealed class CsvBankImportMapper
             if (!decimal.TryParse(amountValue, NumberStyles.Number | NumberStyles.AllowCurrencySymbol | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var parsedAmount))
             {
                 throw new InvalidOperationException($"Unable to parse amount '{amountValue}' on row {i + 1}.");
+            }
+
+            if (invertAmounts)
+            {
+                parsedAmount = -parsedAmount;
             }
 
             var type = parsedAmount >= 0 ? "Income" : "Expense";

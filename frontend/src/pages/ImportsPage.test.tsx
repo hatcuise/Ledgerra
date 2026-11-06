@@ -373,6 +373,23 @@ describe("ImportsPage", () => {
     }
   });
 
+  test("sends the selected CSV amount inversion and resets it for a new file", async () => {
+    renderImportsPage();
+    fireEvent.change(screen.getByLabelText("Account"), { target: { value: "account-1" } });
+    fireEvent.change(screen.getByLabelText("Report file"), {
+      target: { files: [new File(["date,amount\n3/7/2026,133"], "card.csv", { type: "text/csv" })] }
+    });
+    const invert = await screen.findByLabelText("Invert amounts");
+    expect(invert).not.toBeChecked();
+    fireEvent.click(invert);
+    fireEvent.submit(screen.getByRole("button", { name: "Analyze report" }).closest("form")!);
+    await waitFor(() => expect(mocks.analyzeMonthlyReport).toHaveBeenCalledWith("token", expect.objectContaining({ invertAmounts: true })));
+    fireEvent.change(screen.getByLabelText("Report file"), {
+      target: { files: [new File(["date,amount\n3/7/2026,25"], "bank.csv", { type: "text/csv" })] }
+    });
+    expect(await screen.findByLabelText("Invert amounts")).not.toBeChecked();
+  });
+
   test("keeps edited draft date and amount values safe before commit", async () => {
     const user = userEvent.setup();
     mocks.analyzeMonthlyReport.mockResolvedValue({

@@ -15,6 +15,8 @@ type ImportAnalysisContextValue = {
   setCsvHeaders: Dispatch<SetStateAction<string[]>>;
   dateColumn: string;
   setDateColumn: Dispatch<SetStateAction<string>>;
+  invertAmounts: boolean;
+  setInvertAmounts: Dispatch<SetStateAction<boolean>>;
   amountColumn: string;
   setAmountColumn: Dispatch<SetStateAction<string>>;
   descriptionColumn: string;
@@ -80,6 +82,7 @@ export function ImportAnalysisProvider({ children }: { children: ReactNode }) {
   const [file, setFile] = useState<File | null>(null);
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [dateColumn, setDateColumn] = useState("");
+  const [invertAmounts, setInvertAmounts] = useState(false);
   const [amountColumn, setAmountColumn] = useState("");
   const [descriptionColumn, setDescriptionColumn] = useState("");
   const [drafts, setDrafts] = useState<MonthlyReportDraftTransaction[]>([]);
@@ -161,6 +164,8 @@ export function ImportAnalysisProvider({ children }: { children: ReactNode }) {
         setCsvHeaders,
         dateColumn,
         setDateColumn,
+        invertAmounts,
+        setInvertAmounts,
         amountColumn,
         setAmountColumn,
         descriptionColumn,

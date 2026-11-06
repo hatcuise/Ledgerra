@@ -590,12 +590,13 @@ export const apiClient = {
     });
   },
 
-  previewCsvBankImport(token: string, payload: { accountId: string; file: File; dateColumn: string; amountColumn: string; descriptionColumn?: string }) {
+  previewCsvBankImport(token: string, payload: { accountId: string; file: File; dateColumn: string; amountColumn: string; descriptionColumn?: string; invertAmounts?: boolean }) {
     const body = new FormData();
     body.append("accountId", payload.accountId);
     body.append("file", payload.file);
     body.append("dateColumn", payload.dateColumn);
     body.append("amountColumn", payload.amountColumn);
+    body.append("invertAmounts", String(payload.invertAmounts ?? false));
     if (payload.descriptionColumn) {
       body.append("descriptionColumn", payload.descriptionColumn);
     }

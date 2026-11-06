@@ -101,6 +101,8 @@ public sealed class CsvImportPreviewRequest
     [Required, MaxLength(120)]
     public string AmountColumn { get; init; } = string.Empty;
 
+    public bool InvertAmounts { get; init; }
+
     [MaxLength(120)]
     public string? DescriptionColumn { get; init; }
 }

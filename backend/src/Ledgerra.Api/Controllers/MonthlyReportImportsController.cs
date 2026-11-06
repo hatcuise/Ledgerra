@@ -122,7 +122,8 @@ public sealed class MonthlyReportImportsController : ControllerBase
                 request.AccountId,
                 request.DateColumn,
                 request.AmountColumn,
-                request.DescriptionColumn);
+                request.DescriptionColumn,
+                request.InvertAmounts);
             return Ok(new MonthlyReportAnalysisResponse(drafts.Select(MapDraft).ToList(), []));
         }
         catch (InvalidOperationException exception)

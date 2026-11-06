@@ -113,6 +113,8 @@ export function ImportsPage() {
     setCsvHeaders,
     dateColumn,
     setDateColumn,
+    invertAmounts,
+    setInvertAmounts,
     amountColumn,
     setAmountColumn,
     descriptionColumn,
@@ -156,6 +158,7 @@ export function ImportsPage() {
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const nextFile = event.target.files?.[0] ?? null;
     setFile(nextFile);
+    setInvertAmounts(false);
     setCsvHeaders([]);
     setDateColumn("");
     setAmountColumn("");
@@ -210,6 +213,7 @@ export function ImportsPage() {
             file,
             dateColumn: selectedDateColumn,
             amountColumn: selectedAmountColumn,
+            invertAmounts,
             descriptionColumn: selectedDescriptionColumn
           })
         : await apiClient.analyzeMonthlyReport(auth.accessToken, { accountId, month, provider, file }, setAnalysisJob);
@@ -458,6 +462,11 @@ export function ImportsPage() {
                   {csvHeaders.map((header) => <option key={`amount-${header}`} value={header}>{header}</option>)}
                 </select>
               </label>
+              <label>
+                <input type="checkbox" checked={invertAmounts} onChange={(event) => setInvertAmounts(event.target.checked)} disabled={isAnalyzing} />
+                {t("imports.invertAmounts")}
+              </label>
+              <p className="form-helper">{t("imports.invertAmountsHelp")}</p>
               <label>
                 {t("imports.descriptionColumn")}
                 <select value={descriptionColumn} onChange={(event) => { setDescriptionColumn(event.target.value); setError(null); }} disabled={isAnalyzing}>

@@ -155,7 +155,8 @@ describe("apiClient", () => {
       accountId: "account-1",
       file: new File(["date,amount"], "report.csv", { type: "text/csv" }),
       dateColumn: "date",
-      amountColumn: "amount"
+      amountColumn: "amount",
+      invertAmounts: true
     })).resolves.toEqual({ transactions: [], warnings: [] });
 
     expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
@@ -167,6 +168,7 @@ describe("apiClient", () => {
       method: "POST",
       headers: { Authorization: "Bearer fresh-token" }
     });
+    expect((fetchMock.mock.calls[2][1].body as FormData).get("invertAmounts")).toBe("true");
     expect(persist).toHaveBeenCalledWith(expect.objectContaining({ accessToken: "fresh-token" }));
   });
 
