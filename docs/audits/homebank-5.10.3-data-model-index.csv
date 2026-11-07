@@ -1,0 +1,198 @@
+source,line,kind,identifier
+src/hb-account.h,27,structure field,key
+src/hb-account.h,28,structure field,flags
+src/hb-account.h,29,structure field,type
+src/hb-account.h,30,structure field,pos
+src/hb-account.h,31,structure field,kcur
+src/hb-account.h,32,structure field,name
+src/hb-account.h,33,structure field,number
+src/hb-account.h,34,structure field,bankname
+src/hb-account.h,35,structure field,kgrp
+src/hb-account.h,36,structure field,initial
+src/hb-account.h,38,structure field,minimum
+src/hb-account.h,39,structure field,maximum
+src/hb-account.h,40,structure field,cheque1
+src/hb-account.h,41,structure field,cheque2
+src/hb-account.h,42,structure field,website
+src/hb-account.h,43,structure field,notes
+src/hb-account.h,44,structure field,ktpl
+src/hb-account.h,45,structure field,cccday
+src/hb-account.h,46,structure field,rdate
+src/hb-account.h,49,structure field,txn_queue
+src/hb-account.h,51,structure field,dspflags
+src/hb-account.h,52,structure field,nb_pending
+src/hb-account.h,55,structure field,bal_clear
+src/hb-account.h,59,structure field,xferincname
+src/hb-account.h,60,structure field,xferexpname
+src/hb-account.h,69,flag; verify active use,AF_CLOSED
+src/hb-account.h,71,flag; verify active use,AF_NOSUMMARY
+src/hb-account.h,72,flag; verify active use,AF_NOBUDGET
+src/hb-account.h,73,flag; verify active use,AF_NOREPORT
+src/hb-account.h,74,flag; verify active use,AF_OUTFLOWSUM
+src/hb-account.h,76,flag; verify active use,AF_HASNOTICE
+src/hb-account.h,79,flag; verify active use,AF_OLDBUDGET
+src/hb-transaction.h,30,structure field,amount
+src/hb-transaction.h,31,structure field,kacc
+src/hb-transaction.h,32,structure field,paymode
+src/hb-transaction.h,33,structure field,grpflg
+src/hb-transaction.h,34,structure field,flags
+src/hb-transaction.h,35,structure field,kpay
+src/hb-transaction.h,36,structure field,kcat
+src/hb-transaction.h,37,structure field,memo
+src/hb-transaction.h,39,structure field,date
+src/hb-transaction.h,40,structure field,pos
+src/hb-transaction.h,41,structure field,status
+src/hb-transaction.h,42,structure field,number
+src/hb-transaction.h,43,structure field,tags
+src/hb-transaction.h,44,structure field,kxfer
+src/hb-transaction.h,45,structure field,kxferacc
+src/hb-transaction.h,46,structure field,xferamount
+src/hb-transaction.h,48,structure field,splits
+src/hb-transaction.h,52,structure field,dspflags
+src/hb-transaction.h,53,structure field,dupgid
+src/hb-transaction.h,54,structure field,matchrate
+src/hb-transaction.h,55,structure field,balance
+src/hb-transaction.h,63,flag; verify active use,OF_INCOME
+src/hb-transaction.h,65,flag; verify active use,OF_INTXFER
+src/hb-transaction.h,66,flag; verify active use,OF_ADVXFER
+src/hb-transaction.h,67,flag; verify active use,OF_REMIND
+src/hb-transaction.h,68,flag; verify active use,OF_CHEQ2
+src/hb-transaction.h,70,flag; verify active use,OF_SPLIT
+src/hb-transaction.h,71,flag; verify active use,OF_ISIMPORT
+src/hb-transaction.h,72,flag; verify active use,OF_ISPAST
+src/hb-split.h,32,structure field,kcat
+src/hb-split.h,33,structure field,amount
+src/hb-split.h,34,structure field,memo
+src/hb-split.h,36,structure field,pos
+src/hb-template.h,28,structure field,key
+src/hb-template.h,30,structure field,amount
+src/hb-template.h,31,structure field,kacc
+src/hb-template.h,32,structure field,paymode
+src/hb-template.h,33,structure field,grpflg
+src/hb-template.h,34,structure field,flags
+src/hb-template.h,35,structure field,kpay
+src/hb-template.h,36,structure field,kcat
+src/hb-template.h,37,structure field,memo
+src/hb-template.h,41,structure field,status
+src/hb-template.h,42,structure field,number
+src/hb-template.h,43,structure field,tags
+src/hb-template.h,45,structure field,kxferacc
+src/hb-template.h,46,structure field,xferamount
+src/hb-template.h,48,structure field,splits
+src/hb-template.h,51,structure field,rec_flags
+src/hb-template.h,52,structure field,rec_freq
+src/hb-template.h,53,structure field,rec_every
+src/hb-template.h,54,structure field,rec_ordinal
+src/hb-template.h,55,structure field,rec_weekday
+src/hb-template.h,56,structure field,nextdate
+src/hb-template.h,57,structure field,daygap
+src/hb-template.h,58,structure field,weekend
+src/hb-template.h,59,structure field,limit
+src/hb-template.h,62,structure field,dspflags
+src/hb-template.h,68,flag; verify active use,TF_RECUR
+src/hb-template.h,69,flag; verify active use,TF_LIMIT
+src/hb-template.h,70,flag; verify active use,TF_RELATIVE
+src/hb-payee.h,27,structure field,key
+src/hb-payee.h,28,structure field,paymode
+src/hb-payee.h,29,structure field,flags
+src/hb-payee.h,30,structure field,kcat
+src/hb-payee.h,31,structure field,name
+src/hb-payee.h,32,structure field,notes
+src/hb-payee.h,36,structure field,nb_use_txn
+src/hb-payee.h,37,structure field,nb_use_all
+src/hb-category.h,29,structure field,key
+src/hb-category.h,30,structure field,parent
+src/hb-category.h,31,structure field,flags
+src/hb-category.h,32,structure field,_pad1
+src/hb-category.h,33,structure field,name
+src/hb-category.h,34,structure field,budget
+src/hb-category.h,37,structure field,fullname
+src/hb-category.h,38,structure field,typename
+src/hb-category.h,40,structure field,nb_use_txn
+src/hb-category.h,41,structure field,nb_use_txncat
+src/hb-category.h,42,structure field,nb_use_all
+src/hb-category.h,43,structure field,nb_use_allcat
+src/hb-category.h,46,flag; verify active use,GF_SUB
+src/hb-category.h,47,flag; verify active use,GF_INCOME
+src/hb-category.h,48,flag; verify active use,GF_CUSTOM
+src/hb-category.h,49,flag; verify active use,GF_BUDGET
+src/hb-category.h,50,flag; verify active use,GF_FORCED
+src/hb-category.h,51,flag; verify active use,GF_MIXED
+src/hb-category.h,53,flag; verify active use,GF_HIDDEN
+src/hb-assign.h,29,structure field,key
+src/hb-assign.h,30,structure field,flags
+src/hb-assign.h,31,structure field,field
+src/hb-assign.h,32,structure field,search
+src/hb-assign.h,33,structure field,notes
+src/hb-assign.h,34,structure field,kpay
+src/hb-assign.h,35,structure field,kcat
+src/hb-assign.h,36,structure field,paymode
+src/hb-assign.h,37,structure field,pos
+src/hb-assign.h,38,structure field,amount
+src/hb-assign.h,39,structure field,tags
+src/hb-assign.h,43,flag; verify active use,ASGF_EXACT
+src/hb-assign.h,44,flag; verify active use,ASGF_DOPAY
+src/hb-assign.h,45,flag; verify active use,ASGF_DOCAT
+src/hb-assign.h,46,flag; verify active use,ASGF_DOMOD
+src/hb-assign.h,47,flag; verify active use,ASGF_DOTAG
+src/hb-assign.h,49,flag; verify active use,ASGF_PREFILLED
+src/hb-assign.h,51,flag; verify active use,ASGF_AMOUNT
+src/hb-assign.h,52,flag; verify active use,ASGF_REGEX
+src/hb-assign.h,53,flag; verify active use,ASGF_OVWPAY
+src/hb-assign.h,54,flag; verify active use,ASGF_OVWCAT
+src/hb-assign.h,55,flag; verify active use,ASGF_OVWMOD
+src/hb-assign.h,56,flag; verify active use,ASGF_OVWTAG
+src/hb-filter.h,154,structure field,key
+src/hb-filter.h,156,structure field,name
+src/hb-filter.h,157,structure field,option
+src/hb-filter.h,159,structure field,range
+src/hb-filter.h,160,structure field,maxdate
+src/hb-filter.h,163,structure field,typ_xinc
+src/hb-filter.h,164,structure field,sta_rec
+src/hb-filter.h,165,structure field,paymode
+src/hb-filter.h,166,structure field,maxamount
+src/hb-filter.h,168,structure field,exact
+src/hb-filter.h,170,structure field,number
+src/hb-filter.h,171,structure field,memo
+src/hb-filter.h,173,structure field,gbacc
+src/hb-filter.h,174,structure field,gbpay
+src/hb-filter.h,175,structure field,gbcat
+src/hb-filter.h,176,structure field,gbtag
+src/hb-filter.h,179,structure field,n_active
+src/hb-filter.h,180,structure field,n_item
+src/hb-filter.h,182,structure field,type
+src/hb-filter.h,183,structure field,status
+src/hb-filter.h,184,structure field,nbchanges
+src/hb-filter.h,185,structure field,nbdaysfuture
+src/hb-filter.h,186,structure field,forceadd
+src/hb-filter.h,187,structure field,forcechg
+src/hb-filter.h,188,structure field,forceremind
+src/hb-filter.h,189,structure field,forcevoid
+src/hb-filter.h,190,structure field,last_tab
+src/hb-currency.h,30,structure field,key
+src/hb-currency.h,31,structure field,flags
+src/hb-currency.h,32,structure field,name
+src/hb-currency.h,33,structure field,iso_code
+src/hb-currency.h,34,structure field,sym_prefix
+src/hb-currency.h,35,structure field,symbol
+src/hb-currency.h,36,structure field,decimal_char
+src/hb-currency.h,37,structure field,grouping_char
+src/hb-currency.h,38,structure field,frac_digits
+src/hb-currency.h,39,structure field,_pad1
+src/hb-currency.h,40,structure field,rate
+src/hb-currency.h,41,structure field,mdate
+src/hb-currency.h,43,structure field,format
+src/hb-currency.h,44,structure field,monfmt
+src/hb-currency.h,53,structure field,curr_iso_code
+src/hb-currency.h,54,structure field,curr_frac_digit
+src/hb-currency.h,55,structure field,curr_dec_char
+src/hb-currency.h,56,structure field,curr_grp_char
+src/hb-currency.h,57,structure field,curr_is_prefix
+src/hb-currency.h,58,structure field,curr_symbol
+src/hb-currency.h,59,structure field,name
+src/hb-tag.h,28,structure field,key
+src/hb-tag.h,29,structure field,name
+src/hb-tag.h,33,structure field,nb_use_txn
+src/hb-tag.h,34,structure field,nb_use_all
+src/hb-group.h,28,structure field,key
+src/hb-group.h,31,structure field,name

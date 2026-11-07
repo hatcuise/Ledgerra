@@ -1,0 +1,814 @@
+document,line,kind,label
+doc/00-intro.html,14,section,Introduction
+doc/00-intro.html,18,section,How HomeBank can help me doing my accounts ?
+doc/00-intro.html,31,section,How HomeBank can analyze the use of my money ?
+doc/00-intro.html,41,section,"I'm new, where do I start ?"
+doc/00-intro.html,51,section,Ask for feature and suggest your ideas
+doc/00-lexicon.html,14,section,Lexicon
+doc/00-lexicon.html,18,field,A-B
+doc/00-lexicon.html,19,field,C-D
+doc/00-lexicon.html,20,field,E-O
+doc/00-lexicon.html,21,field,P-S
+doc/00-lexicon.html,22,field,T-Z
+doc/00-lexicon.html,91,section,Wallet
+doc/00-lexicon.html,97,section,Account
+doc/00-lexicon.html,104,section,Account type
+doc/00-lexicon.html,107,section,Bank
+doc/00-lexicon.html,109,section,Cash
+doc/00-lexicon.html,114,section,Asset
+doc/00-lexicon.html,120,section,Credit card
+doc/00-lexicon.html,124,section,Liability
+doc/00-lexicon.html,129,section,Checking
+doc/00-lexicon.html,131,section,Savings
+doc/00-lexicon.html,137,section,Transaction
+doc/00-lexicon.html,152,section,Type of transaction
+doc/00-lexicon.html,153,section,Expense
+doc/00-lexicon.html,156,section,Income
+doc/00-lexicon.html,159,section,Transfer
+doc/00-lexicon.html,177,section,Inline calculation
+doc/00-lexicon.html,184,section,Status of transaction
+doc/00-lexicon.html,185,section,Cleared
+doc/00-lexicon.html,188,section,Reconciled
+doc/00-lexicon.html,191,section,Remind
+doc/00-lexicon.html,195,section,Void
+doc/00-lexicon.html,203,section,Flags of transaction
+doc/00-lexicon.html,210,section,Financial institution
+doc/00-lexicon.html,217,section,Forecast (cashflow)
+doc/00-lexicon.html,224,section,Life Energy
+doc/00-lexicon.html,233,section,Lock transaction
+doc/00-lexicon.html,243,section,Currency
+doc/00-lexicon.html,249,section,Payment Mode
+doc/00-lexicon.html,251,section,(none)
+doc/00-lexicon.html,253,section,credit card
+doc/00-lexicon.html,255,section,check
+doc/00-lexicon.html,257,section,cash
+doc/00-lexicon.html,259,section,bank transfer
+doc/00-lexicon.html,261,section,debit card
+doc/00-lexicon.html,263,section,standing order
+doc/00-lexicon.html,265,section,electronic payment
+doc/00-lexicon.html,267,section,deposit
+doc/00-lexicon.html,269,section,financial institution fee
+doc/00-lexicon.html,271,section,direct debit
+doc/00-lexicon.html,273,section,Mobile Phone
+doc/00-lexicon.html,278,section,Number
+doc/00-lexicon.html,283,section,Split
+doc/00-lexicon.html,289,section,Scheduled
+doc/00-lexicon.html,297,section,Template
+doc/00-lexicon.html,306,section,Payee
+doc/00-lexicon.html,320,section,Pending
+doc/00-lexicon.html,343,section,Category
+doc/00-lexicon.html,351,section,Tag
+doc/00-lexicon.html,356,section,Assignment
+doc/00-lexicon.html,362,section,Budget
+doc/00-lexicon.html,370,section,Unbudgeted
+doc/00-lexicon.html,378,section,Backup
+doc/00-lexicon.html,393,section,Balances
+doc/00-notenglish.html,14,section,Translate this documentation
+doc/00-previously.html,14,section,Previously on HomeBank...
+doc/00-previously.html,125,section,New features in v5.9
+doc/00-previously.html,129,section,Basic inline calculation in amount txn/split dialog
+doc/00-previously.html,138,section,2 new icon sets
+doc/00-previously.html,155,section,New scheduling options
+doc/00-previously.html,164,section,New pending status transaction
+doc/00-previously.html,175,section,Re-layout of assignment dialog
+doc/00-previously.html,187,section,New features in v5.8
+doc/00-previously.html,190,section,Favorite saved filters
+doc/00-previously.html,198,section,Tooltip of active filters
+doc/00-previously.html,206,section,Color flags
+doc/00-previously.html,215,section,Life energy
+doc/00-previously.html,223,section,Payment re-order & hide
+doc/00-previously.html,229,section,New features in v5.7
+doc/00-previously.html,232,section,Cash Flow Forecast
+doc/00-previously.html,246,section,Budget Report over time
+doc/00-previously.html,261,section,Chart drill down for categories
+doc/00-previously.html,273,section,New Home Total and Time chart
+doc/00-previously.html,298,section,New features in v5.6
+doc/00-previously.html,301,section,Charts for Over Time Statistics report
+doc/00-previously.html,313,section,Filter redesign and improvement
+doc/00-previously.html,329,section,Internal transfer with different currencies
+doc/00-previously.html,341,section,Multiple item selection for trend time report
+doc/00-previously.html,349,section,More date range option and redesign
+doc/00-previously.html,365,section,Hide payee/category to lighten the lists
+doc/00-previously.html,373,section,Feature to lock changes of reconciled transactions
+doc/00-previously.html,383,section,Assignment dialog changes and improvements
+doc/00-previously.html,398,section,New features in v5.5
+doc/00-previously.html,401,section,Print for graphic report
+doc/00-previously.html,407,section,Your account new columns and display choose
+doc/00-previously.html,422,section,GTK override for font size and dark theme
+doc/00-previously.html,428,section,New features in v5.4
+doc/00-previously.html,431,section,Mass assignment creation
+doc/00-previously.html,438,section,Popup menu on transaction list
+doc/00-previously.html,445,section,Multiple line scheduled post
+doc/00-previously.html,451,section,Reworked the welcome dialog
+doc/00-previously.html,457,section,New features in v5.3
+doc/00-previously.html,460,section,Added a transaction type
+doc/00-previously.html,468,section,Added group account
+doc/00-previously.html,474,section,Statistics report shows items over time
+doc/00-previously.html,490,section,New features in v5.2
+doc/00-previously.html,493,section,Export transaction as PDF (for print)
+doc/00-previously.html,499,section,List of all transactions
+doc/00-previously.html,514,section,Import of multiple file with more option
+doc/00-previously.html,520,section,A real backup mechanism
+doc/00-previously.html,525,section,Duplicate transaction finder
+doc/00-previously.html,531,section,Default template for each account
+doc/00-previously.html,537,section,New features in v5.1
+doc/00-previously.html,539,section,Multiple currencies
+doc/00-previously.html,546,section,Payee default category and payment type
+doc/00-previously.html,551,section,New feature for automatic assignments
+doc/00-previously.html,563,section,New features in v5.0
+doc/00-previously.html,565,section,Cleared status to enrich the transaction status
+doc/00-previously.html,582,section,Stack chart for budget
+doc/00-previously.html,592,section,Quick search for list
+doc/00-previously.html,603,section,New features in v4.6
+doc/00-previously.html,605,section,Quick search for transaction
+doc/00-previously.html,618,section,Configure fiscal year boundaries
+doc/00-previously.html,631,section,Scheduled transaction date before or after weekend
+doc/00-previously.html,643,section,Ability to individually play scheduled transactions from the list
+doc/00-previously.html,657,section,New features in v4.5
+doc/00-previously.html,659,section,Ability to change language
+doc/00-previously.html,664,section,Where your money goes
+doc/00-previously.html,677,section,Category split for transactions
+doc/00-previously.html,689,section,New filters for account window
+doc/00-previously.html,705,section,Scheduled append until a day of month
+doc/00-whatsnew.html,14,section,What's New in HomeBank 5.10
+doc/00-whatsnew.html,42,section,View locked transaction in read-only
+doc/00-whatsnew.html,49,section,Edit account shortcut
+doc/00-whatsnew.html,55,section,Hide closed account
+doc/00-whatsnew.html,62,section,Sort same day by amount
+doc/00-whatsnew.html,70,section,Multiple transaction edition prefill
+doc/dlg-acco.html,14,section,Accounts dialog
+doc/dlg-acco.html,16,section,Dialog call
+doc/dlg-acco.html,30,section,Using accounts dialog
+doc/dlg-acco.html,32,section,Hide closed
+doc/dlg-acco.html,35,section,Quick search
+doc/dlg-acco.html,38,section,Account list
+doc/dlg-acco.html,44,section,Buttons
+doc/dlg-acco.html,47,field,Add
+doc/dlg-acco.html,51,field,Delete
+doc/dlg-acco.html,55,field,Edit
+doc/dlg-acco.html,59,field,Move up (1)
+doc/dlg-acco.html,63,field,Move down (1)
+doc/dlg-acco.html,70,section,General
+doc/dlg-acco.html,73,field,Type
+doc/dlg-acco.html,77,field,Group
+doc/dlg-acco.html,81,field,Institution
+doc/dlg-acco.html,85,field,Number
+doc/dlg-acco.html,89,field,Start balance
+doc/dlg-acco.html,93,field,Currency
+doc/dlg-acco.html,100,field,This account was closed
+doc/dlg-acco.html,105,field,Website
+doc/dlg-acco.html,109,field,Notes
+doc/dlg-acco.html,114,section,Behavior
+doc/dlg-acco.html,117,field,Default template
+doc/dlg-acco.html,122,field,Exclude from account summary
+doc/dlg-acco.html,126,field,Outflow in summary
+doc/dlg-acco.html,130,field,Exclude from the budget
+doc/dlg-acco.html,134,field,Exclude from any reports
+doc/dlg-acco.html,139,section,Misc.
+doc/dlg-acco.html,142,field,Overdraft at Maximum / Credit limit
+doc/dlg-acco.html,162,field,Checkbook 1
+doc/dlg-acco.html,166,field,Checkbook 2
+doc/dlg-arch.html,14,section,Scheduled/Template transactions dialog
+doc/dlg-arch.html,16,section,Dialog call
+doc/dlg-arch.html,29,section,Using Scheduled/Template transactions dialog
+doc/dlg-arch.html,31,section,Scheduled/Template switcher
+doc/dlg-arch.html,34,section,Scheduled/Template list
+doc/dlg-arch.html,40,section,Buttons
+doc/dlg-arch.html,43,field,Add
+doc/dlg-arch.html,47,field,Delete
+doc/dlg-arch.html,51,field,Edit
+doc/dlg-arch.html,55,field,Schedule
+doc/dlg-arch.html,60,section,Scheduled popup
+doc/dlg-arch.html,63,field,Activate
+doc/dlg-arch.html,67,field,Next date
+doc/dlg-arch.html,75,field,Interval
+doc/dlg-arch.html,87,field,The < specific> day
+doc/dlg-arch.html,119,field,Week-end
+doc/dlg-arch.html,130,field,Stop after xx posts
+doc/dlg-assi.html,14,section,Assignments dialog
+doc/dlg-assi.html,17,section,Dialog call
+doc/dlg-assi.html,30,section,Using assignments dialog
+doc/dlg-assi.html,32,section,Quick search
+doc/dlg-assi.html,36,section,Assignment list
+doc/dlg-assi.html,42,section,Buttons
+doc/dlg-assi.html,45,field,Add
+doc/dlg-assi.html,49,field,Delete
+doc/dlg-assi.html,53,field,Edit
+doc/dlg-assi.html,57,field,Duplicate
+doc/dlg-assi.html,61,field,Move up (1)
+doc/dlg-assi.html,65,field,Move down (1)
+doc/dlg-assi.html,69,field,Move to (1)
+doc/dlg-assi.html,75,section,Condition
+doc/dlg-assi.html,78,field,Search
+doc/dlg-assi.html,82,field,In
+doc/dlg-assi.html,86,field,Case sensitive (Aa)
+doc/dlg-assi.html,90,field,Regular expression (.*)
+doc/dlg-assi.html,94,field,AND Amount
+doc/dlg-assi.html,100,section,Assignments
+doc/dlg-assi.html,104,field,Payee
+doc/dlg-assi.html,111,field,Category
+doc/dlg-assi.html,118,field,Payment
+doc/dlg-assi.html,123,field,Tags
+doc/dlg-assi.html,127,field,Notes
+doc/dlg-bud1.html,14,section,Budget dialog
+doc/dlg-bud1.html,18,section,Dialog call
+doc/dlg-bud1.html,31,section,Using budget table view dialog
+doc/dlg-bud1.html,33,section,Summary/Expense/Income switcher
+doc/dlg-bud1.html,36,section,Quick search
+doc/dlg-bud1.html,40,section,Menu button
+doc/dlg-bud1.html,43,field,Import
+doc/dlg-bud1.html,47,field,Export
+doc/dlg-bud1.html,51,field,Clear All
+doc/dlg-bud1.html,58,section,Budget list
+doc/dlg-bud1.html,72,section,Options
+doc/dlg-bud1.html,76,field,Clear input
+doc/dlg-bud1.html,80,field,Force monitoring this category
+doc/dlg-bud1.html,98,section,Using budget dialog
+doc/dlg-bud1.html,100,section,Expense/Income switcher
+doc/dlg-bud1.html,103,section,Menu button
+doc/dlg-bud1.html,106,field,Import
+doc/dlg-bud1.html,110,field,Export
+doc/dlg-bud1.html,116,section,Category list
+doc/dlg-bud1.html,124,section,Budget totals
+doc/dlg-bud1.html,127,section,Budget for ...
+doc/dlg-bud1.html,130,field,is the same each month
+doc/dlg-bud1.html,135,field,is different per month
+doc/dlg-bud1.html,140,field,"Jan, Feb, ..., Dec"
+doc/dlg-bud1.html,144,field,Clear input
+doc/dlg-bud1.html,148,section,Options
+doc/dlg-bud1.html,151,field,Force monitoring this category
+doc/dlg-cate.html,14,section,Categories dialog
+doc/dlg-cate.html,16,section,Dialog call
+doc/dlg-cate.html,28,section,Using categories dialog
+doc/dlg-cate.html,30,section,View buttons
+doc/dlg-cate.html,33,field,Show hidden
+doc/dlg-cate.html,37,field,Show usage
+doc/dlg-cate.html,41,field,Type switcher
+doc/dlg-cate.html,46,section,Quick search
+doc/dlg-cate.html,50,section,Menu Button
+doc/dlg-cate.html,53,field,Import CSV
+doc/dlg-cate.html,57,field,Export CSV
+doc/dlg-cate.html,61,field,Delete unused
+doc/dlg-cate.html,68,section,Categories list
+doc/dlg-cate.html,82,section,Action buttons
+doc/dlg-cate.html,85,field,Add
+doc/dlg-cate.html,89,field,Delete
+doc/dlg-cate.html,93,field,Edit
+doc/dlg-cate.html,97,field,Move/Merge
+doc/dlg-cate.html,101,field,Hide/Show
+doc/dlg-cate.html,106,section,Category name
+doc/dlg-cate.html,108,section,Subcategory name
+doc/dlg-curr.html,14,section,Currencies dialog
+doc/dlg-curr.html,17,section,Dialog call
+doc/dlg-curr.html,30,section,Using currencies dialog
+doc/dlg-curr.html,32,section,General
+doc/dlg-curr.html,35,field,Update on-line
+doc/dlg-curr.html,44,section,Currencies list
+doc/dlg-curr.html,46,section,Buttons
+doc/dlg-curr.html,49,field,Add
+doc/dlg-curr.html,54,field,Edit
+doc/dlg-curr.html,58,field,Delete
+doc/dlg-curr.html,62,field,Set as base
+doc/dlg-curr.html,68,section,Notes: add a currency
+doc/dlg-curr.html,79,section,Notes: Online Currency Update
+doc/dlg-filt.html,14,section,Filter dialog
+doc/dlg-filt.html,30,section,Common element
+doc/dlg-filt.html,34,field,Option
+doc/dlg-filt.html,46,section,Always show
+doc/dlg-filt.html,51,field,Remind
+doc/dlg-filt.html,55,field,Void
+doc/dlg-filt.html,59,field,Added
+doc/dlg-filt.html,63,field,Edited
+doc/dlg-filt.html,76,section,Date
+doc/dlg-filt.html,80,field,Range
+doc/dlg-filt.html,84,field,From
+doc/dlg-filt.html,88,field,To
+doc/dlg-filt.html,102,section,Type
+doc/dlg-filt.html,103,section,Type
+doc/dlg-filt.html,116,section,Status
+doc/dlg-filt.html,117,section,Status
+doc/dlg-filt.html,131,section,Account / Payee / Category / Tag
+doc/dlg-filt.html,136,field,Select
+doc/dlg-filt.html,140,field,{Items}
+doc/dlg-filt.html,155,section,Payment
+doc/dlg-filt.html,158,field,Select
+doc/dlg-filt.html,162,field,{payment}
+doc/dlg-filt.html,176,section,Amount
+doc/dlg-filt.html,179,field,From
+doc/dlg-filt.html,183,field,To
+doc/dlg-filt.html,187,section,Text
+doc/dlg-filt.html,190,field,Memo
+doc/dlg-filt.html,194,field,Info
+doc/dlg-filt.html,198,field,Case sensitive
+doc/dlg-mult.html,14,section,Multiple transaction dialog
+doc/dlg-mult.html,16,section,Dialog call
+doc/dlg-mult.html,28,section,Using multiple transaction column edition
+doc/dlg-paye.html,14,section,Payees dialog
+doc/dlg-paye.html,16,section,Dialog call
+doc/dlg-paye.html,29,section,Using payees dialog
+doc/dlg-paye.html,31,section,View buttons
+doc/dlg-paye.html,34,field,Show hidden
+doc/dlg-paye.html,38,field,Show usage
+doc/dlg-paye.html,43,section,Quick search
+doc/dlg-paye.html,46,section,Menu Button
+doc/dlg-paye.html,49,field,Import CSV
+doc/dlg-paye.html,53,field,Export CSV
+doc/dlg-paye.html,57,field,Delete unused
+doc/dlg-paye.html,64,section,Payee list
+doc/dlg-paye.html,73,section,Action buttons
+doc/dlg-paye.html,76,field,Add
+doc/dlg-paye.html,80,field,Delete
+doc/dlg-paye.html,84,field,Edit
+doc/dlg-paye.html,88,field,Move/Merge
+doc/dlg-paye.html,92,field,Hide/Show
+doc/dlg-paye.html,97,section,Payee name
+doc/dlg-pref.html,14,section,Preferences dialog
+doc/dlg-pref.html,47,section,General
+doc/dlg-pref.html,48,section,Program start
+doc/dlg-pref.html,51,field,Show splash screen
+doc/dlg-pref.html,55,field,Load last opened file
+doc/dlg-pref.html,59,field,Post pending scheduled transactions
+doc/dlg-pref.html,63,field,Update currencies on-line
+doc/dlg-pref.html,79,section,Interface
+doc/dlg-pref.html,80,section,General
+doc/dlg-pref.html,83,field,Color the amounts
+doc/dlg-pref.html,87,field,Color the background of future transaction
+doc/dlg-pref.html,91,field,Grid line
+doc/dlg-pref.html,104,section,Charts options
+doc/dlg-pref.html,107,field,Smaller legend font
+doc/dlg-pref.html,112,section,Deprecated
+doc/dlg-pref.html,115,field,Tool-bar
+doc/dlg-pref.html,131,section,Theming
+doc/dlg-pref.html,133,section,Theme
+doc/dlg-pref.html,137,field,Dark mode
+doc/dlg-pref.html,142,field,Use dark mode if available
+doc/dlg-pref.html,148,section,Icons
+doc/dlg-pref.html,151,field,Icon theme
+doc/dlg-pref.html,155,field,Use symbolic icons if available
+doc/dlg-pref.html,159,section,GTK settings
+doc/dlg-pref.html,162,field,Override
+doc/dlg-pref.html,166,field,Font size
+doc/dlg-pref.html,180,section,Color
+doc/dlg-pref.html,182,section,Chart
+doc/dlg-pref.html,185,field,Palette
+doc/dlg-pref.html,202,section,Others
+doc/dlg-pref.html,205,field,Uses colors from the chart palette
+doc/dlg-pref.html,209,field,Expense
+doc/dlg-pref.html,213,field,Income
+doc/dlg-pref.html,217,field,Warning
+doc/dlg-pref.html,221,field,Background future
+doc/dlg-pref.html,235,section,Locale
+doc/dlg-pref.html,237,section,User interface
+doc/dlg-pref.html,240,field,Language
+doc/dlg-pref.html,244,field,Date display
+doc/dlg-pref.html,248,field,Customize
+doc/dlg-pref.html,254,section,Fiscal year
+doc/dlg-pref.html,257,field,Start on
+doc/dlg-pref.html,261,section,Measurement units
+doc/dlg-pref.html,264,field,Use miles for meter
+doc/dlg-pref.html,268,field,Use gallon for fuel
+doc/dlg-pref.html,284,section,Transactions
+doc/dlg-pref.html,286,section,General
+doc/dlg-pref.html,289,field,Always show remind
+doc/dlg-pref.html,293,field,Always show void
+doc/dlg-pref.html,297,field,Include remind into balance and report
+doc/dlg-pref.html,302,section,Ledger window
+doc/dlg-pref.html,305,field,Range
+doc/dlg-pref.html,309,field,Show future [xx] days ahead
+doc/dlg-pref.html,317,field,Hide reconciled
+doc/dlg-pref.html,321,field,Same day sort
+doc/dlg-pref.html,326,section,Safety
+doc/dlg-pref.html,329,field,Lock reconciled for any changes
+doc/dlg-pref.html,333,field,Approve additions before last reconciliation
+doc/dlg-pref.html,337,field,Approve addition before XX days before today's date
+doc/dlg-pref.html,354,section,Dialog
+doc/dlg-pref.html,355,section,Transaction dialog
+doc/dlg-pref.html,358,field,Keep the last date when multiple add
+doc/dlg-pref.html,366,field,Enable memo autocomplete with [xxx] rolling days
+doc/dlg-pref.html,371,field,Show confirmation text for 5s
+doc/dlg-pref.html,375,field,Show template list when edit
+doc/dlg-pref.html,391,section,Transfer
+doc/dlg-pref.html,393,section,Behavior
+doc/dlg-pref.html,396,field,"When adding, always show selection action for target dialog"
+doc/dlg-pref.html,400,field,Date gapto find a target: [xx] days
+doc/dlg-pref.html,406,section,Synchronize
+doc/dlg-pref.html,409,field,Date
+doc/dlg-pref.html,413,field,Status
+doc/dlg-pref.html,431,section,Payment
+doc/dlg-pref.html,432,section,Payment shows & chooses
+doc/dlg-pref.html,448,section,Import/Export
+doc/dlg-pref.html,449,section,General options
+doc/dlg-pref.html,452,field,Date order
+doc/dlg-pref.html,463,field,Sentence case memo/payee
+doc/dlg-pref.html,467,section,OFX/QFX options
+doc/dlg-pref.html,470,field,OFX Name
+doc/dlg-pref.html,481,field,OFX Memo
+doc/dlg-pref.html,493,section,QIF options
+doc/dlg-pref.html,496,field,Import memos
+doc/dlg-pref.html,500,field,Swap memos with payees
+doc/dlg-pref.html,504,section,CSV options
+doc/dlg-pref.html,507,field,Separator
+doc/dlg-pref.html,522,section,Report
+doc/dlg-pref.html,523,section,Main window reports
+doc/dlg-pref.html,526,field,Max items
+doc/dlg-pref.html,531,section,Initial filter
+doc/dlg-pref.html,534,field,Range
+doc/dlg-pref.html,540,section,Statistics options
+doc/dlg-pref.html,543,field,Show by amount
+doc/dlg-pref.html,547,field,Show rate column
+doc/dlg-pref.html,551,field,Show details
+doc/dlg-pref.html,555,field,Include transfer
+doc/dlg-pref.html,559,section,Budget options
+doc/dlg-pref.html,562,field,Show details
+doc/dlg-pref.html,566,field,Exclude subcategories...
+doc/dlg-pref.html,583,section,Forecast
+doc/dlg-pref.html,584,section,Forecast
+doc/dlg-pref.html,587,field,Enable forecast
+doc/dlg-pref.html,591,field,Month number: [xx]
+doc/dlg-pref.html,610,section,Backup
+doc/dlg-pref.html,611,section,Backup
+doc/dlg-pref.html,614,field,Enable automatic backups
+doc/dlg-pref.html,618,field,Number of backups to keep [xx]
+doc/dlg-pref.html,636,section,Folders
+doc/dlg-pref.html,641,section,HomeBank files
+doc/dlg-pref.html,644,field,Wallets
+doc/dlg-pref.html,648,field,Backups
+doc/dlg-pref.html,652,section,Exchange files
+doc/dlg-pref.html,655,field,Import
+doc/dlg-pref.html,659,field,Export
+doc/dlg-pref.html,676,section,Euro minor
+doc/dlg-pref.html,677,section,General
+doc/dlg-pref.html,680,field,Enable
+doc/dlg-pref.html,685,field,Preset
+doc/dlg-pref.html,689,section,Configuration
+doc/dlg-pref.html,693,field,1 XXX =
+doc/dlg-pref.html,697,section,Format
+doc/dlg-pref.html,701,field,Symbol
+doc/dlg-pref.html,705,field,Is prefix
+doc/dlg-pref.html,709,field,Decimal char
+doc/dlg-pref.html,713,field,Frac digits
+doc/dlg-pref.html,717,field,Grouping char
+doc/dlg-pref.html,733,section,Advanced
+doc/dlg-pref.html,734,section,Currency API
+doc/dlg-pref.html,737,field,Url
+doc/dlg-pref.html,742,field,Key
+doc/dlg-pref.html,748,section,Default API
+doc/dlg-pref.html,756,section,Compatible APIs
+doc/dlg-pref.html,771,section,Previous used API
+doc/dlg-spli.html,14,section,Split transaction dialog
+doc/dlg-spli.html,17,section,Dialog call
+doc/dlg-spli.html,28,section,Using split transaction dialog
+doc/dlg-spli.html,30,section,split list
+doc/dlg-spli.html,34,section,Actions list buttons
+doc/dlg-spli.html,37,field,edit
+doc/dlg-spli.html,41,field,-
+doc/dlg-spli.html,45,field,=
+doc/dlg-spli.html,49,section,Split line details
+doc/dlg-spli.html,52,field,Category
+doc/dlg-spli.html,56,field,Memo
+doc/dlg-spli.html,60,field,Amount
+doc/dlg-spli.html,68,section,Split line buttons
+doc/dlg-spli.html,74,section,Split information
+doc/dlg-spli.html,78,field,LINES
+doc/dlg-spli.html,82,field,SPLIT TOTAL
+doc/dlg-spli.html,86,field,TRANSACTION
+doc/dlg-spli.html,90,field,DIFFERENCE
+doc/dlg-tag.html,14,section,Tags dialog
+doc/dlg-tag.html,17,section,Dialog call
+doc/dlg-tag.html,28,section,Using tags dialog
+doc/dlg-tag.html,30,section,Menu Button
+doc/dlg-tag.html,33,field,Import CSV
+doc/dlg-tag.html,37,field,Export CSV
+doc/dlg-tag.html,43,section,Tag list
+doc/dlg-tag.html,46,section,Buttons
+doc/dlg-tag.html,49,field,Add
+doc/dlg-tag.html,53,field,Delete
+doc/dlg-tag.html,57,field,Edit
+doc/dlg-tag.html,62,field,Move/Merge
+doc/dlg-tag.html,67,section,Tag name
+doc/dlg-tran.html,14,section,Transaction dialog
+doc/dlg-tran.html,18,section,Dialog call
+doc/dlg-tran.html,34,section,Using transaction dialog
+doc/dlg-tran.html,36,section,Type of transaction
+doc/dlg-tran.html,41,section,Use a template
+doc/dlg-tran.html,46,section,Transaction details
+doc/dlg-tran.html,49,field,Date
+doc/dlg-tran.html,61,field,Amount
+doc/dlg-tran.html,66,field,(transfer Amount)
+doc/dlg-tran.html,75,field,Account(transfer From/To)
+doc/dlg-tran.html,79,field,Payment
+doc/dlg-tran.html,83,field,Book 2
+doc/dlg-tran.html,87,field,Number (Payment)
+doc/dlg-tran.html,91,field,Payee
+doc/dlg-tran.html,98,field,Category
+doc/dlg-tran.html,106,field,Status
+doc/dlg-tran.html,119,field,Memo
+doc/dlg-tran.html,124,field,Tags
+doc/dlg-tran.html,129,section,Action button area
+doc/dlg-tran.html,136,field,Add
+doc/dlg-tran.html,144,field,Add & Keep
+doc/dlg-tran.html,148,field,Close
+doc/dlg-wall.html,14,section,Properties dialog
+doc/dlg-wall.html,16,section,Dialog call
+doc/dlg-wall.html,26,section,Using properties dialog
+doc/dlg-wall.html,28,section,General
+doc/dlg-wall.html,31,field,Title
+doc/dlg-wall.html,36,section,Scheduled transactions
+doc/dlg-wall.html,39,field,Mode
+doc/dlg-wall.html,67,section,Life Energy
+doc/dlg-wall.html,70,field,Earn by hour
+doc/dlg-wall.html,76,section,Vehicle cost
+doc/dlg-wall.html,79,field,Category
+doc/dlg-xfer.html,14,section,Action for internal transfer creation dialog
+doc/dlg-xfer.html,18,section,Dialog popup
+doc/dlg-xfer.html,31,section,Using this dialog
+doc/dlg-xfer.html,33,section,Source transfer
+doc/dlg-xfer.html,36,section,Target association suggested
+doc/dlg-xfer.html,46,section,Action button area
+doc/dlg-xfer.html,49,field,Use Selection
+doc/dlg-xfer.html,53,field,Create New
+doc/dlg-xfer.html,57,field,Cancel (or dialog close)
+doc/menu-ledger.html,14,section,Account window menus
+doc/menu-ledger.html,25,section,Account
+doc/menu-ledger.html,28,field,Export QIF...
+doc/menu-ledger.html,32,field,Export CSV...
+doc/menu-ledger.html,36,field,Print...
+doc/menu-ledger.html,40,field,Browse website...
+doc/menu-ledger.html,44,field,Close...
+doc/menu-ledger.html,51,section,Edit
+doc/menu-ledger.html,54,field,Copy
+doc/menu-ledger.html,58,field,Paste
+doc/menu-ledger.html,62,field,Paste (today)
+doc/menu-ledger.html,69,section,Transaction
+doc/menu-ledger.html,72,field,Add...
+doc/menu-ledger.html,76,field,Inherit...
+doc/menu-ledger.html,80,field,Edit...
+doc/menu-ledger.html,84,field,Status > None
+doc/menu-ledger.html,89,field,Status > Cleared
+doc/menu-ledger.html,94,field,Status > Reconciled
+doc/menu-ledger.html,99,field,Multiple Edit
+doc/menu-ledger.html,103,field,Create assignment...
+doc/menu-ledger.html,107,field,Create template...
+doc/menu-ledger.html,111,field,Delete...
+doc/menu-ledger.html,115,field,Find
+doc/menu-ledger.html,121,section,Tools
+doc/menu-ledger.html,124,field,Mark duplicate
+doc/menu-ledger.html,128,field,Mark category sign
+doc/menu-ledger.html,132,field,Check internal transfer...
+doc/menu-ledger.html,136,field,Auto. assignments
+doc/menu-ledger.html,140,field,Filter...
+doc/menu-ledger.html,144,field,Convert to euro...
+doc/menu-main.html,14,section,Main window menu
+doc/menu-main.html,27,section,File
+doc/menu-main.html,30,field,New
+doc/menu-main.html,34,field,Open...
+doc/menu-main.html,38,field,Open Recent
+doc/menu-main.html,42,field,Save
+doc/menu-main.html,46,field,Save as...
+doc/menu-main.html,50,field,Import...
+doc/menu-main.html,56,field,Export as QIF...
+doc/menu-main.html,60,field,Revert
+doc/menu-main.html,64,field,Restore backup
+doc/menu-main.html,69,field,Properties...
+doc/menu-main.html,73,field,Close
+doc/menu-main.html,77,field,Quit
+doc/menu-main.html,87,section,Edit
+doc/menu-main.html,90,field,Preferences...
+doc/menu-main.html,96,section,View
+doc/menu-main.html,99,field,Toolbar
+doc/menu-main.html,103,field,Total chart
+doc/menu-main.html,107,field,Time chart
+doc/menu-main.html,110,field,Bottom lists
+doc/menu-main.html,114,field,Minor currency
+doc/menu-main.html,120,section,Manage
+doc/menu-main.html,123,field,Wallet...
+doc/menu-main.html,127,field,Accounts...
+doc/menu-main.html,131,field,Payees...
+doc/menu-main.html,135,field,Categories...
+doc/menu-main.html,139,field,Tags...
+doc/menu-main.html,144,field,Scheduled/Template...
+doc/menu-main.html,148,field,Assignments...
+doc/menu-main.html,152,field,Currencies...
+doc/menu-main.html,157,field,Budget...
+doc/menu-main.html,161,field,Budget (table view)...
+doc/menu-main.html,167,section,Transactions
+doc/menu-main.html,170,field,Show all...
+doc/menu-main.html,174,field,Show...
+doc/menu-main.html,179,field,Add...
+doc/menu-main.html,184,field,Post scheduled
+doc/menu-main.html,188,field,Set scheduler...
+doc/menu-main.html,194,section,Reports
+doc/menu-main.html,197,field,Statistics...
+doc/menu-main.html,201,field,Trend Time...
+doc/menu-main.html,205,field,Balance...
+doc/menu-main.html,209,field,Budget...
+doc/menu-main.html,213,field,Vehicle cost...
+doc/menu-main.html,219,section,Tools
+doc/menu-main.html,222,field,Show welcome dialog...
+doc/menu-main.html,226,field,File statistics...
+doc/menu-main.html,230,field,Anonymize...
+doc/menu-main.html,236,section,Help
+doc/menu-main.html,239,field,Contents
+doc/menu-main.html,243,field,Get Help Online...
+doc/menu-main.html,247,field,Check for updates...
+doc/menu-main.html,251,field,Release Notes
+doc/menu-main.html,255,field,Report a problem
+doc/menu-main.html,259,field,Translate this Application
+doc/menu-main.html,263,field,About
+doc/misc-csvformat.html,14,section,File CSV format
+doc/misc-csvformat.html,29,section,Transaction import CSV format
+doc/misc-csvformat.html,32,field,date
+doc/misc-csvformat.html,43,field,payment
+doc/misc-csvformat.html,63,field,number
+doc/misc-csvformat.html,67,field,payee
+doc/misc-csvformat.html,71,field,memo
+doc/misc-csvformat.html,75,field,amount
+doc/misc-csvformat.html,79,field,category
+doc/misc-csvformat.html,83,field,tags
+doc/misc-csvformat.html,101,section,Transaction export CSV format
+doc/misc-csvformat.html,107,field,from All transaction
+doc/misc-csvformat.html,111,field,option: Add Status column
+doc/misc-csvformat.html,115,field,option: Detail split lines
+doc/misc-csvformat.html,122,field,c
+doc/misc-csvformat.html,145,section,Budget CSV format
+doc/misc-csvformat.html,149,field,level
+doc/misc-csvformat.html,153,field,type
+doc/misc-csvformat.html,158,field,category
+doc/misc-csvformat.html,163,field,value(s)
+doc/misc-csvformat.html,180,section,Category CSV format
+doc/misc-csvformat.html,183,field,level
+doc/misc-csvformat.html,188,field,type
+doc/misc-csvformat.html,193,field,category name
+doc/misc-csvformat.html,209,section,Payee CSV format
+doc/misc-csvformat.html,212,field,payee name
+doc/misc-csvformat.html,216,field,full category name
+doc/misc-csvformat.html,220,field,notes
+doc/misc-csvformat.html,235,section,Tag CSV format
+doc/misc-csvformat.html,238,field,tag name
+doc/use-auto_addition.html,14,section,Using the Scheduled transaction feature
+doc/use-auto_addition.html,23,section,Step 1: Create scheduled transactions
+doc/use-auto_addition.html,40,section,Step 2: Configure the insertion rules and options
+doc/use-auto_addition.html,56,section,Step 3: Check and manually manage
+doc/use-auto_assign.html,14,section,Using the Automatic assignment feature
+doc/use-auto_assign.html,22,section,Step 1: Create assignment rules
+doc/use-auto_assign.html,35,section,Step 2: Trigger the assignment
+doc/use-budget.html,14,section,Using the Budget feature
+doc/use-budget.html,23,section,Step 1: Select the accounts to exclude from the budget
+doc/use-budget.html,32,section,Step 2: Set a budget amount against each category
+doc/use-budget.html,41,section,Step 3: View the budget report
+doc/use-favfilters.html,14,section,Using the Favorite filters feature
+doc/use-favfilters.html,29,section,Create a new filter
+doc/use-favfilters.html,36,section,Edit an existing filter
+doc/use-favfilters.html,50,section,Tooltip
+doc/use-import.html,14,section,Using the Import files feature
+doc/use-import.html,37,section,Step 1: Open the import assistant dialog
+doc/use-import.html,51,section,Step 2: Select file(s) to import
+doc/use-import.html,58,section,Step 3: Adjust what to import for each account
+doc/use-import.html,115,section,Step 4: Confirmation
+doc/use-lend-refund.html,14,section,Using the Remind status to follow up lend/refund money
+doc/use-lend-refund.html,29,section,Step 1: Create the remind transaction
+doc/use-lend-refund.html,32,field,Date
+doc/use-lend-refund.html,33,field,Payee
+doc/use-lend-refund.html,34,field,Category
+doc/use-lend-refund.html,35,field,Amount
+doc/use-lend-refund.html,36,field,Info
+doc/use-lend-refund.html,37,field,Status
+doc/use-lend-refund.html,38,field,Memo
+doc/use-lend-refund.html,43,section,Step 2: Follow up your remind transaction
+doc/use-lend-refund.html,48,section,"Step 3: At payback, change remind to a real transaction"
+doc/use-lend-refund.html,51,field,Date
+doc/use-lend-refund.html,52,field,Payee
+doc/use-lend-refund.html,53,field,Category
+doc/use-lend-refund.html,54,field,Amount
+doc/use-lend-refund.html,55,field,Info
+doc/use-lend-refund.html,56,field,Status
+doc/use-lend-refund.html,57,field,Memo
+doc/use-lend-refund.html,61,section,Final note
+doc/use-loan-mortgage.html,14,section,Using HomeBank to follow up a loan or mortgage
+doc/use-loan-mortgage.html,27,section,Step 1: Setup the accounts
+doc/use-loan-mortgage.html,35,section,Step 2: Setup the recurring transaction
+doc/use-loan-mortgage.html,47,section,Step 3: Input or import the monthly fee
+doc/use-loan-mortgage.html,55,section,"Goal: Display evolution, progression"
+doc/use-reconcile.html,14,section,How to Reconcile transaction with your statement
+doc/use-reconcile.html,30,section,Check and mark each transaction as Reconciled
+doc/use-reconcile.html,42,section,If the balance are not equals at the end ?
+doc/use-tipsandtricks.html,14,section,Tips & Tricks
+doc/use-tipsandtricks.html,29,section,Keyboard users
+doc/use-tipsandtricks.html,50,section,Listview multiple selection
+doc/use-tipsandtricks.html,61,section,Listview
+doc/use-tipsandtricks.html,69,section,List-view quick search
+doc/use-tipsandtricks.html,89,section,Date widget key action
+doc/use-tipsandtricks.html,100,section,Change the account order into main window
+doc/use-tipsandtricks.html,107,section,Automatic check numbering
+doc/use-tipsandtricks.html,124,section,Duplicate transaction finder
+doc/use-tipsandtricks.html,131,section,Add Payee/Categories from transaction dialog
+doc/use-tipsandtricks.html,137,section,Euro minor
+doc/use-vehiclecost.html,14,section,Using the Vehicle cost feature
+doc/use-vehiclecost.html,23,section,Step 1: Create the vehicles categories
+doc/use-vehiclecost.html,34,section,Step 2: Fill some transaction with vehicle-cost data's
+doc/use-vehiclecost.html,43,field,d=xxxxxx
+doc/use-vehiclecost.html,48,field,v=xx.xx
+doc/use-vehiclecost.html,53,field,v~xx.xx
+doc/use-vehiclecost.html,61,section,Step 3: View the results into the vehicle cost report
+doc/win-balance.html,14,section,Balance report
+doc/win-balance.html,20,section,Window call
+doc/win-balance.html,33,section,Using balance report
+doc/win-balance.html,35,section,Display
+doc/win-balance.html,38,field,Interval
+doc/win-balance.html,51,field,Show empty line
+doc/win-balance.html,55,field,Zoom X
+doc/win-balance.html,59,section,Date filter
+doc/win-balance.html,62,field,Range
+doc/win-balance.html,66,field,From / To
+doc/win-balance.html,71,section,Account filter
+doc/win-balance.html,75,field,Select
+doc/win-balance.html,79,field,[Account listview]
+doc/win-balance.html,83,field,Include transfer
+doc/win-balance.html,91,section,Tool bar
+doc/win-balance.html,94,section,Info
+doc/win-balance.html,99,section,Result list
+doc/win-balance.html,103,section,Transaction detail list
+doc/win-budget.html,14,section,Budget Report
+doc/win-budget.html,17,section,Window call
+doc/win-budget.html,30,section,Using budget report
+doc/win-budget.html,32,section,Display
+doc/win-budget.html,35,field,Mode
+doc/win-budget.html,40,field,Type
+doc/win-budget.html,50,field,Only out of budget
+doc/win-budget.html,54,section,Date filter
+doc/win-budget.html,57,field,Range
+doc/win-budget.html,61,field,From / To
+doc/win-budget.html,65,field,Until today
+doc/win-budget.html,71,section,Tool bar
+doc/win-budget.html,76,section,Total
+doc/win-budget.html,79,section,Result list / Bar chart
+doc/win-budget.html,83,section,Transaction detail list
+doc/win-ledger.html,14,section,Ledger window
+doc/win-ledger.html,24,section,Menu
+doc/win-ledger.html,27,section,Quick filter area
+doc/win-ledger.html,40,section,Quick search
+doc/win-ledger.html,53,section,Selected transaction information
+doc/win-ledger.html,62,section,Balance
+doc/win-ledger.html,66,section,Transaction list
+doc/win-ledger.html,110,section,Tool bar
+doc/win-ledger.html,114,section,Lock/Unlock reconciled changes
+doc/win-main.html,14,section,Main window
+doc/win-main.html,23,section,Drop files
+doc/win-main.html,27,section,Menu
+doc/win-main.html,30,section,Toolbar
+doc/win-main.html,37,section,Your accounts
+doc/win-main.html,85,section,Total chart
+doc/win-main.html,111,section,Time chart
+doc/win-main.html,137,section,Bottom transaction lists
+doc/win-statistics.html,14,section,Statistics report
+doc/win-statistics.html,21,section,Window call
+doc/win-statistics.html,35,section,Using statistics report
+doc/win-statistics.html,37,section,Display
+doc/win-statistics.html,40,field,Mode
+doc/win-statistics.html,45,field,View by
+doc/win-statistics.html,59,field,Balance mode
+doc/win-statistics.html,64,field,Zoom X
+doc/win-statistics.html,74,field,Type
+doc/win-statistics.html,85,field,Sort by amount
+doc/win-statistics.html,93,field,Interval
+doc/win-statistics.html,107,field,Forecast
+doc/win-statistics.html,113,section,Date filter
+doc/win-statistics.html,116,field,Range
+doc/win-statistics.html,120,field,From / To
+doc/win-statistics.html,124,section,Tool-bar
+doc/win-statistics.html,129,section,Total
+doc/win-statistics.html,132,section,Result list / Column chart / Donuts chart
+doc/win-statistics.html,135,section,Transaction detail list
+doc/win-trendtime.html,14,section,Trend time report
+doc/win-trendtime.html,17,section,Window call
+doc/win-trendtime.html,30,section,Using trend time report
+doc/win-trendtime.html,32,section,Display
+doc/win-trendtime.html,35,field,Interval
+doc/win-trendtime.html,48,field,Cumulate
+doc/win-trendtime.html,52,field,Show empty line
+doc/win-trendtime.html,56,field,Zoom X
+doc/win-trendtime.html,60,section,Date filter
+doc/win-trendtime.html,63,field,Range
+doc/win-trendtime.html,67,field,From / To
+doc/win-trendtime.html,72,section,Item filter
+doc/win-trendtime.html,76,field,By
+doc/win-trendtime.html,89,field,Select
+doc/win-trendtime.html,96,section,Tool bar
+doc/win-trendtime.html,101,section,Result list
+doc/win-trendtime.html,104,section,Transaction detail list
+doc/win-vehiclecost.html,14,section,Vehicle cost report
+doc/win-vehiclecost.html,17,section,Window call
+doc/win-vehiclecost.html,29,section,Using vehicle cost report
+doc/win-vehiclecost.html,31,section,Display
+doc/win-vehiclecost.html,34,field,Vehicle
+doc/win-vehiclecost.html,38,section,Date filter
+doc/win-vehiclecost.html,41,field,Range
+doc/win-vehiclecost.html,45,field,From / To
+doc/win-vehiclecost.html,50,section,Tool bar
+doc/win-vehiclecost.html,53,section,Global results
+doc/win-vehiclecost.html,56,field,Meter
+doc/win-vehiclecost.html,60,field,Consumption
+doc/win-vehiclecost.html,64,field,Fuel cost
+doc/win-vehiclecost.html,68,field,Other cost
+doc/win-vehiclecost.html,72,field,Total cost
+doc/win-vehiclecost.html,76,section,Detailed results
