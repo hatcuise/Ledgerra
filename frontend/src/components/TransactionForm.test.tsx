@@ -1,10 +1,11 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { apiClient } from "../api/client";
 import { TransactionForm, toDateTimeLocal } from "./TransactionForm";
 
 vi.mock("../api/client", () => ({
   apiClient: {
+    bookkeeping: vi.fn().mockResolvedValue([]),
     createTransaction: vi.fn(),
     updateTransaction: vi.fn(),
     createCategory: vi.fn()
@@ -22,6 +23,10 @@ function formatLocalDateTime(value: Date) {
 }
 
 describe("TransactionForm date values", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(apiClient.bookkeeping).mockImplementation(async (_token, path) => (path.endsWith("/details") ? { metadata: { payeeId: null, reference: "bank-ref", tags: "home", paymentMethod: "Card", status: "Cleared" }, splitLines: [{ categoryId: "food", amount: 10 }, { categoryId: "home", amount: 20 }], destinationAccountId: null } : []) as never);
+  });
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
@@ -76,4 +81,25 @@ describe("TransactionForm date values", () => {
     fireEvent.submit(screen.getByRole("button", { name: "Save transaction" }));
     expect(apiClient.createTransaction).toHaveBeenCalledWith("token", expect.objectContaining({ savingsGoalId: "g1" }));
   });
+  test("blocks unbalanced splits and keeps loaded allocations and metadata on edit", async () => {
+    vi.mocked(apiClient.updateTransaction).mockResolvedValue({ id: "new", accountId: "a", type: "Expense", amount: 30, occurredOnUtc: "2026-04-10T12:00:00Z" });
+    render(<TransactionForm token="token" accounts={[]} categories={[{ id: "food", name: "Food", kind: "Expense", isSystem: false }, { id: "home", name: "Home", kind: "Expense", isSystem: false }]} mode="edit" transactionId="old" initialValues={{ accountId: "a", amount: "30" }} onSaved={() => {}} />);
+    await screen.findByLabelText("Split amount 1");
+    expect(screen.getByLabelText("Reference")).toHaveValue("bank-ref");
+    fireEvent.change(screen.getByLabelText("Split amount 1"), { target: { value: "11" } });
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Split amount 2"), { target: { value: "19" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() => expect(apiClient.updateTransaction).toHaveBeenCalledWith("token", "old", expect.objectContaining({ reference: "bank-ref", tags: "home", status: "Cleared", paymentMethod: "Card", splitLines: [{ categoryId: "food", amount: 11 }, { categoryId: "home", amount: 19 }] })));
+  });
+
+  test("does not flatten a split when details cannot be loaded", async () => {
+    vi.mocked(apiClient.bookkeeping).mockRejectedValue(new Error("Details unavailable"));
+    render(<TransactionForm token="token" accounts={[]} categories={[]} mode="edit" transactionId="old" initialValues={{ accountId: "a", amount: "30" }} onSaved={() => {}} />);
+    await screen.findByRole("alert");
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
+    fireEvent.submit(screen.getByRole("button", { name: "Save changes" }));
+    expect(apiClient.updateTransaction).not.toHaveBeenCalled();
+  });
+
 });

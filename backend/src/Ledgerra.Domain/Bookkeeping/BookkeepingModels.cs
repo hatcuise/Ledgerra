@@ -25,7 +25,16 @@ public sealed class EntryMetadata
     public string Reference { get; set; } = "";
     public string Tags { get; set; } = "";
     public string Status { get; set; } = "Uncleared";
+    public string PaymentMethod { get; set; } = "";
     public Guid? ReconciliationId { get; set; }
+}
+
+public sealed class SavedLedgerView
+{
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public string Name { get; set; } = "";
+    public string Query { get; set; } = "";
 }
 
 public sealed class Reconciliation

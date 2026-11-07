@@ -160,3 +160,40 @@ deleted through the old transfer editor before unlinking.
 
 The [HomeBank capability audit](audits/homebank-5.10.3-gap-analysis.md) lists the
 remaining work and distinguishes reference behavior from engineering recommendations.
+
+## Everyday ledger tools (v0.15.0)
+
+In **Transactions → Add transaction**, choose Expense and **Add split**. Allocate
+at least two positive amounts to expense categories. The allocation total must
+equal the transaction amount; the unallocated balance is shown before saving.
+Editing a split loads its allocations. If loading fails, saving is disabled to
+prevent inadvertently replacing it with a single category.
+
+Expand **Payee, reference, tags and payment details** to set metadata in the same
+save. Tags are comma separated. **Save and keep details** leaves the entry form
+open for repeated entry. **Duplicate** opens an unsaved copy for review, with the
+reference and cleared state reset. Imported source identities are never cloned.
+
+**Bookkeeping → Payees and tags** supports editing and merging payees, deleting
+unused payees and renaming/combining/removing used tags. A payee merge keeps the
+target's default category and updates references without changing balances.
+
+**Categories → Category hierarchy and merge** stores parent relationships and
+performs real merges. Merging repairs dependencies, including split allocations
+and transfer undo history. It stops on overlapping budget limits so no planned
+amount or carry-forward policy is silently discarded. Parent relationships do
+not yet aggregate budget/report totals.
+
+**Transactions → Named saved filters** saves multiple views to your account and
+backup. Selecting a saved filter restores the account, category, type, date,
+amount and note filters. Saving the same name replaces that saved view.
+
+**Settings → Import rules → Additional rule conditions** constrains a text rule
+by account and amount; all conditions must match. **Bookkeeping → Apply rules to
+existing transactions** previews the active rules by priority, lets you select
+changes and rechecks their validity before committing. A type change can affect
+balances, so both the current and proposed types are shown. Reconciled entries,
+splits and transfers are excluded. Narrow the dates if more than 2,000 eligible
+entries would be reviewed.
+
+See [v0.15.0 scope and remaining work](release-notes/v0.15.0.md).

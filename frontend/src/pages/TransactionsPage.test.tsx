@@ -49,6 +49,7 @@ vi.mock("../state/AuthContext", () => ({
 
 vi.mock("../api/client", () => ({
   apiClient: {
+    bookkeeping: vi.fn((_token: string, path: string) => Promise.resolve(path.endsWith("/details") ? { metadata: { payeeId: null, reference: "", tags: "", status: "Uncleared", paymentMethod: "" }, splitLines: [], destinationAccountId: null } : [])),
     createCategory: mocks.createCategory,
     createTransaction: mocks.createTransaction,
     updateTransaction: mocks.updateTransaction,
@@ -185,6 +186,9 @@ describe("TransactionsPage", () => {
     expect(within(row).queryByRole("button", { name: "Duplicate Market" })).not.toBeInTheDocument();
     await user.click(within(row).getByRole("button", { name: "Transaction actions for Market" }));
     await user.click(screen.getByRole("button", { name: "Duplicate Market" }));
+    await screen.findByText("Review the copy, then save it. Bank reference and cleared state have been reset.");
+    expect(mocks.createTransaction).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Save transaction" }));
 
     await waitFor(() => {
       expect(mocks.createTransaction).toHaveBeenCalledWith(

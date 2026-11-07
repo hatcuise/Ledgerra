@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Ledgerra.Api.Contracts;
 using Ledgerra.Api.Extensions;
 using Ledgerra.Domain.Categories;
@@ -69,6 +70,7 @@ public sealed class ImportRulesController : ControllerBase
             MatchField = matchField,
             MatchOperator = matchOperator,
             MatchValue = request.MatchValue.Trim(),
+            ConditionsJson = JsonSerializer.Serialize(request.Conditions ?? []),
             AssignCategoryId = request.AssignCategoryId,
             AssignTransactionType = transactionType,
             Priority = request.Priority,
@@ -110,6 +112,7 @@ public sealed class ImportRulesController : ControllerBase
         rule.MatchField = matchField;
         rule.MatchOperator = matchOperator;
         rule.MatchValue = request.MatchValue.Trim();
+        if (request.Conditions is not null) rule.ConditionsJson = JsonSerializer.Serialize(request.Conditions);
         rule.AssignCategoryId = request.AssignCategoryId;
         rule.AssignTransactionType = transactionType;
         rule.Priority = request.Priority;
@@ -176,6 +179,14 @@ public sealed class ImportRulesController : ControllerBase
             return this.ValidationError(new Dictionary<string, string[]> { ["assignTransactionType"] = ["Supported assigned transaction types are Income, Expense, and Refund."] });
         }
 
+        if (request.Conditions is not null)
+        {
+            if (request.Conditions.Count > 8 || request.Conditions.Any(x => !IsValidCondition(x)))
+                return this.ValidationError(new Dictionary<string, string[]> { ["conditions"] = ["Use at most eight valid additional conditions."] });
+            foreach (var condition in request.Conditions.Where(x => x.Field.Equals("Account", StringComparison.OrdinalIgnoreCase)))
+                if (!Guid.TryParse(condition.Value, out var accountId) || !await _dbContext.Accounts.AnyAsync(x => x.UserId == userId && x.Id == accountId, cancellationToken))
+                    return NotFound(new ProblemDetails { Title = "Condition account not found." });
+        }
         var trimmedName = request.Name.Trim();
         var duplicateNameExists = await _dbContext.CategorizationRules.AnyAsync(
             rule => rule.UserId == userId &&
@@ -205,6 +216,11 @@ public sealed class ImportRulesController : ControllerBase
 
         return null;
     }
+
+    internal static bool IsValidCondition(ImportRuleCondition? condition) => condition is not null
+        && !string.IsNullOrWhiteSpace(condition.Value) && condition.Value.Length <= 200
+        && TryParseSupportedMatchField(condition.Field, out var field)
+        && TryParseSupportedMatchOperator(condition.Operator, out var op) && IsSupportedOperatorForField(field, op);
 
     private static bool TryParseSupportedMatchField(string value, out ImportRuleMatchField field)
     {
@@ -245,6 +261,7 @@ public sealed class ImportRulesController : ControllerBase
             rule.Priority,
             rule.IsActive,
             rule.CreatedAtUtc,
-            rule.UpdatedAtUtc);
+            rule.UpdatedAtUtc,
+            JsonSerializer.Deserialize<List<ImportRuleCondition>>(rule.ConditionsJson) ?? []);
     }
 }

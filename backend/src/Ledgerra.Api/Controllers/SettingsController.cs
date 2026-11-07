@@ -161,6 +161,7 @@ public sealed class SettingsController : ControllerBase
         _dbContext.EntryMetadata.RemoveRange(_dbContext.EntryMetadata.Where(x => x.UserId == userId));
         _dbContext.Reconciliations.RemoveRange(_dbContext.Reconciliations.Where(x => x.UserId == userId));
         _dbContext.Payees.RemoveRange(_dbContext.Payees.Where(x => x.UserId == userId));
+        _dbContext.SavedLedgerViews.RemoveRange(_dbContext.SavedLedgerViews.Where(x => x.UserId == userId));
         _dbContext.ImportProfiles.RemoveRange(_dbContext.ImportProfiles.Where(x => x.UserId == userId));
         _dbContext.Transactions.RemoveRange(_dbContext.Transactions.Where(transaction => transaction.UserId == userId));
         _dbContext.CategorizationRules.RemoveRange(_dbContext.CategorizationRules.Where(rule => rule.UserId == userId));

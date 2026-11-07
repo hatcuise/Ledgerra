@@ -8,6 +8,8 @@ public static class BookkeepingSchemaInitializer
     {
         if (!db.Database.IsRelational()) return;
         await db.Database.ExecuteSqlRawAsync("""
+            ALTER TABLE "CategorizationRules" ADD COLUMN IF NOT EXISTS "ConditionsJson" varchar(4000) NOT NULL DEFAULT '[]';
+            ALTER TABLE "Categories" ADD COLUMN IF NOT EXISTS "ParentCategoryId" uuid NULL;
             ALTER TABLE "RecurringTransactionTemplates" ADD COLUMN IF NOT EXISTS "DestinationAccountId" uuid NULL REFERENCES "Accounts" ("Id") ON DELETE RESTRICT;
             CREATE TABLE IF NOT EXISTS "ImportProfiles" (
                 "Id" uuid PRIMARY KEY, "UserId" uuid NOT NULL, "Name" varchar(120) NOT NULL, "SettingsJson" varchar(8000) NOT NULL);
@@ -20,6 +22,10 @@ public static class BookkeepingSchemaInitializer
                 "PayeeId" uuid NULL, "Reference" varchar(120) NOT NULL, "Tags" varchar(400) NOT NULL,
                 "Status" varchar(20) NOT NULL, "ReconciliationId" uuid NULL);
             ALTER TABLE "EntryMetadata" ADD COLUMN IF NOT EXISTS "ExternalKey" varchar(64) NULL;
+            ALTER TABLE "EntryMetadata" ADD COLUMN IF NOT EXISTS "PaymentMethod" varchar(40) NOT NULL DEFAULT '';
+            CREATE TABLE IF NOT EXISTS "SavedLedgerViews" (
+                "Id" uuid PRIMARY KEY, "UserId" uuid NOT NULL, "Name" varchar(120) NOT NULL, "Query" varchar(4000) NOT NULL);
+            CREATE UNIQUE INDEX IF NOT EXISTS "IX_SavedLedgerViews_UserId_Name" ON "SavedLedgerViews" ("UserId", "Name");
             CREATE UNIQUE INDEX IF NOT EXISTS "IX_EntryMetadata_UserId_ExternalKey" ON "EntryMetadata" ("UserId", "ExternalKey") WHERE "ExternalKey" IS NOT NULL;
             CREATE TABLE IF NOT EXISTS "TransferMatches" (
                 "Id" uuid PRIMARY KEY, "UserId" uuid NOT NULL, "OutgoingId" uuid NOT NULL, "IncomingId" uuid NOT NULL,

@@ -49,7 +49,8 @@ export function SettingsPage() {
   const { setLanguageCode, t } = useI18n();
   const { themePreference, resolvedTheme, accentColor, setThemePreference, setAccentColor } = useTheme();
   const [activeSection, setActiveSection] = useState<SettingsSection>("appearance");
-  const { profile, aiSettings, categories, importRules, exchangeRates, refresh } = useLedgerraData({
+  const { profile, aiSettings, categories, importRules, exchangeRates, accounts = [], refresh } = useLedgerraData({
+    accounts: true,
     profile: true,
     aiSettings: true,
     categories: true,
@@ -68,6 +69,9 @@ export function SettingsPage() {
   const [isLoadingOpenAiCompatibleModels, setIsLoadingOpenAiCompatibleModels] = useState(false);
   const [aiProviderError, setAiProviderError] = useState<string | null>(null);
   const [ruleName, setRuleName] = useState("");
+  const [ruleAccountId, setRuleAccountId] = useState("");
+  const [ruleAmountAbove, setRuleAmountAbove] = useState("");
+  const [ruleAmountBelow, setRuleAmountBelow] = useState("");
   const [ruleMatchValue, setRuleMatchValue] = useState("");
   const [transactionType, setTransactionType] = useState("Expense");
   const [ruleCategoryId, setRuleCategoryId] = useState("");
@@ -299,10 +303,15 @@ export function SettingsPage() {
         assignCategoryId: ruleCategoryId,
         assignTransactionType: transactionType,
         priority: 100,
-        isActive: true
+        isActive: true,
+        ...((ruleAccountId || ruleAmountAbove || ruleAmountBelow) ? { conditions: [
+          ...(ruleAccountId ? [{ field: "Account", operator: "Equals", value: ruleAccountId }] : []),
+          ...(ruleAmountAbove ? [{ field: "Amount", operator: "GreaterThan", value: ruleAmountAbove }] : []),
+          ...(ruleAmountBelow ? [{ field: "Amount", operator: "LessThan", value: ruleAmountBelow }] : [])
+        ] } : {})
       });
       setRuleName("");
-      setRuleMatchValue("");
+      setRuleMatchValue(""); setRuleAccountId(""); setRuleAmountAbove(""); setRuleAmountBelow("");
       await refresh();
     } catch (exception) {
       setRuleError(getErrorMessage(exception, t("settings.unableToSaveRule")));
@@ -1033,6 +1042,11 @@ export function SettingsPage() {
                         ))}
                       </select>
                     </label>
+                    <details><summary>Additional rule conditions (all must match)</summary>
+                      <label>Only in account<select value={ruleAccountId} onChange={event => setRuleAccountId(event.target.value)}><option value="">Any account</option>{accounts.map(account => <option key={account.id} value={account.id}>{account.name}</option>)}</select></label>
+                      <label>Amount greater than<input type="number" min="0" step="0.01" value={ruleAmountAbove} onChange={event => setRuleAmountAbove(event.target.value)} /></label>
+                      <label>Amount less than<input type="number" min="0" step="0.01" value={ruleAmountBelow} onChange={event => setRuleAmountBelow(event.target.value)} /></label>
+                    </details>
                     <button className="primary-button" type="submit" disabled={filteredCategories.length === 0}>
                       {t("settings.addRule")}
                     </button>
@@ -1046,7 +1060,7 @@ export function SettingsPage() {
                           <div>
                             <strong>{rule.name}</strong>
                             <p>
-                              {rule.matchField} {rule.matchOperator.toLowerCase()} "{rule.matchValue}" -&gt;{" "}
+                              {rule.matchField} {rule.matchOperator.toLowerCase()} "{rule.matchValue}" {rule.conditions?.map(condition => `AND ${condition.field} ${condition.operator} ${condition.value}`).join(" ")} -&gt;{" "}
                               {categoryNamesById.get(rule.assignCategoryId) ?? t("settings.unknownCategory")}
                             </p>
                           </div>

@@ -192,3 +192,12 @@ copy HomeBank C implementation into the MIT project without a separate licensing
 | Specialized finance | 1 | 3 | 10 | 0 | 0 |
 | Backups and wallet files | 6 | 0 | 9 | 2 | 0 |
 | Preferences and ergonomics | 9 | 2 | 21 | 2 | 0 |
+
+## Phase 3A follow-up — v0.15.0
+
+The original CSV inventory remains a historical v0.13.0 baseline. The
+[v0.15.0 release notes](../release-notes/v0.15.0.md) record delivered split editing,
+metadata entry, clone/add-and-keep, payee/tag operations, category hierarchy and
+merge, named transaction filters and previewed retrospective/compound rules.
+Phase 3 is not yet complete: reusable templates, void/reminder states, shared
+report filters and richer management/rollups remain explicitly listed there.

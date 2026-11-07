@@ -12,13 +12,14 @@ public sealed record UpdateCategoryCommand(Guid UserId, Guid CategoryId, string 
 
 public sealed record DeleteCategoryCommand(Guid UserId, Guid CategoryId);
 
-public sealed record CategoryDetails(Guid Id, string Name, string Kind, string? Color, bool IsSystem);
+public sealed record CategoryDetails(Guid Id, string Name, string Kind, string? Color, bool IsSystem, Guid? ParentCategoryId = null);
 
 public enum CategoryDeleteStatus
 {
     Deleted,
     NotFound,
-    UsedByImportRules
+    UsedByImportRules,
+    UsedByDependencies
 }
 
 public interface ICategoryStore
@@ -121,6 +122,11 @@ public sealed class UpdateCategoryCommandHandler
             return CategoryCommandResult.ValidationError("kind", "Unsupported category kind.");
         }
 
+        var all = await _categoryStore.GetAllAsync(command.UserId, cancellationToken);
+        var existing = all.SingleOrDefault(x => x.Id == command.CategoryId);
+        if (existing is not null && existing.Kind != kind && (existing.ParentCategoryId.HasValue || all.Any(x => x.ParentCategoryId == existing.Id)))
+            return CategoryCommandResult.ValidationError("kind", "Detach category hierarchy before changing its kind.");
+
         var category = await _categoryStore.UpdateAsync(
             command.UserId,
             command.CategoryId,
@@ -182,6 +188,6 @@ internal static class CategoryMappings
 {
     public static CategoryDetails MapCategory(Category category)
     {
-        return new CategoryDetails(category.Id, category.Name, category.Kind.ToString(), category.Color, category.IsSystem);
+        return new CategoryDetails(category.Id, category.Name, category.Kind.ToString(), category.Color, category.IsSystem, category.ParentCategoryId);
     }
 }

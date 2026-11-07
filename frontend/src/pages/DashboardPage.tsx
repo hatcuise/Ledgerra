@@ -410,9 +410,9 @@ export function DashboardPage() {
               onError={setQuickAddError}
               onStatus={setQuickAddStatus}
               onCancel={() => setIsQuickAddOpen(false)}
-              onSaved={async () => {
+              onSaved={async (_, keepDetails) => {
                 await refresh();
-                setIsQuickAddOpen(false);
+                if (!keepDetails) setIsQuickAddOpen(false);
               }}
             />
           </section>

@@ -22,6 +22,11 @@ public sealed class ReconciliationGuardAttribute : ActionFilterAttribute
             var entry = await db.Transactions.SingleOrDefaultAsync(x => x.UserId == userId && x.Id == id, ct);
             if (entry is not null)
             {
+                if (entry.ParentTransactionId.HasValue)
+                {
+                    context.Result = new BadRequestObjectResult(new ProblemDetails { Title = "Edit split allocations through their parent transaction." });
+                    return;
+                }
                 if (entry.TransferGroupId.HasValue && await db.TransferMatches.AnyAsync(h => h.UserId == userId && h.Id == entry.TransferGroupId, ct))
                 {
                     context.Result = new ConflictObjectResult(new ProblemDetails { Title = "Undo this recognized transfer match before editing or deleting either original entry." });

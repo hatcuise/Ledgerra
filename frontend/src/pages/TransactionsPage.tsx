@@ -1,3 +1,4 @@
+import { SavedLedgerViews } from "../components/SavedLedgerViews";
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { apiClient } from "../api/client";
 import { TransactionForm, toDateTimeLocal, toFormType, type TransactionFormMode, type TransactionFormValues } from "../components/TransactionForm";
@@ -47,6 +48,7 @@ function isTransferTransaction(transaction: Transaction) {
 }
 
 function getCategorisableTransactionKind(transaction: Transaction) {
+  if (transaction.splitGroupId) return "";
   return transaction.type === "Refund" ? "Expense" : transaction.type === "Expense" || transaction.type === "Income" ? transaction.type : "";
 }
 
@@ -229,13 +231,14 @@ export function TransactionsPage() {
     const min = minAmount ? Number(minAmount) : null;
     const max = maxAmount ? Number(maxAmount) : null;
     return ledgerTransactions.filter((transaction) => {
+      if (transaction.parentTransactionId) return false;
       if (filterType === "Transfer" && !transaction.type.startsWith("Transfer")) {
         return false;
       }
       if (filterAccountIds.length > 0 && !filterAccountIds.includes(transaction.accountId)) {
         return false;
       }
-      if (filterType !== "Transfer" && filterCategoryIds.length > 0 && !filterCategoryIds.includes(transaction.categoryId ?? "")) {
+      if (filterType !== "Transfer" && filterCategoryIds.length > 0 && !filterCategoryIds.includes(transaction.categoryId ?? "") && !ledgerTransactions.some(child => child.parentTransactionId === transaction.id && filterCategoryIds.includes(child.categoryId ?? ""))) {
         return false;
       }
       if (min !== null && transaction.amount < min) {
@@ -245,7 +248,7 @@ export function TransactionsPage() {
         return false;
       }
 
-      if (showUncategorizedOnly && ((transaction.type !== "Expense" && transaction.type !== "Refund") || transaction.categoryId)) {
+      if (showUncategorizedOnly && ((transaction.type !== "Expense" && transaction.type !== "Refund") || transaction.categoryId || transaction.splitGroupId)) {
         return false;
       }
 
@@ -497,16 +500,12 @@ export function TransactionsPage() {
 
     try {
       setErrorMessage("");
-      await apiClient.createTransaction(auth.accessToken, {
-        accountId: transaction.accountId,
-        categoryId: transaction.categoryId ?? undefined,
-        amount: transaction.amount,
-        type: transaction.type,
-        occurredOnUtc: transaction.occurredOnUtc,
-        note: transaction.note ?? undefined
-      });
-      setStatusMessage(t("transactions.duplicated"));
-      await refreshAfterMutation();
+      const details = await apiClient.bookkeeping<{ metadata: { payeeId: string | null; tags: string; paymentMethod: string }; splitLines: Array<{ categoryId: string; amount: number }> }>(auth.accessToken, `entries/${transaction.id}/details`);
+      setIsEntryOpen(true); setFormMode("create"); setEditingTransactionId(null);
+      setFormValues({ type: transaction.type, accountId: transaction.accountId, categoryId: transaction.categoryId ?? "", amount: String(transaction.amount),
+        occurredOnUtc: toDateTimeLocal(new Date().toISOString()), note: transaction.note ?? "", payeeId: details.metadata.payeeId ?? "", tags: details.metadata.tags, paymentMethod: details.metadata.paymentMethod ?? "",
+        reference: "", status: "Uncleared", splitLines: details.splitLines.map(line => ({ categoryId: line.categoryId, amount: String(line.amount) })) });
+      setStatusMessage("Review the copy, then save it. Bank reference and cleared state have been reset.");
     } catch (caughtError) {
       setErrorMessage(caughtError instanceof Error ? caughtError.message : t("transactions.unableToDuplicate"));
     }
@@ -681,8 +680,8 @@ export function TransactionsPage() {
                   onCancel={formMode === "edit" ? resetForm : undefined}
                   onError={setErrorMessage}
                   onStatus={setStatusMessage}
-                  onSaved={async () => {
-                    resetForm();
+                  onSaved={async (_, keepDetails) => {
+                    if (!keepDetails) resetForm();
                     await refreshAfterMutation();
                   }}
                 />
@@ -831,7 +830,7 @@ export function TransactionsPage() {
                                 <span>{getTransactionTypeLabel(toFormType(transaction.type), t)}</span>
                               </div>
                               <div className="transaction-row-actions">
-                                {!transaction.categoryId && (transaction.type === "Expense" || transaction.type === "Refund") ? (
+                                {!transaction.categoryId && !transaction.splitGroupId && (transaction.type === "Expense" || transaction.type === "Refund") ? (
                                   <label className="quick-category-control">
                                     {t("transactions.assignCategoryTo", { label })}
                                     <select
@@ -937,6 +936,12 @@ export function TransactionsPage() {
           </div>
 
           <div id="transaction-filter-content" className="transaction-settings-content" hidden={filtersCollapsed}>
+          {auth?.accessToken && <SavedLedgerViews token={auth.accessToken} onApply={params => {
+            setFilterAccountIds(params.getAll("accountId")); setFilterCategoryIds(params.getAll("categoryId"));
+            setFilterType(params.get("type") ?? ""); setFromDate(params.get("from") ?? ""); setToDate(params.get("to") ?? "");
+            setMinAmount(params.get("minAmount") ?? ""); setMaxAmount(params.get("maxAmount") ?? ""); setNoteSearch(params.get("q") ?? "");
+            setShowUncategorizedOnly(params.get("view") === "uncategorized" || params.get("uncategorizedOnly") === "true");
+          }} />}
           <div className="transaction-filter-section">
             <span className="transaction-filter-label">{t("transactions.filterByType")}</span>
             <div className="transaction-filter-segmented" aria-label={t("transactions.filterByType")}>

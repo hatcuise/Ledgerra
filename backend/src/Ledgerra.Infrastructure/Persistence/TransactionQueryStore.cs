@@ -35,7 +35,7 @@ public sealed class TransactionQueryStore : ITransactionQueryStore
 
         if (categoryIds.Count > 0)
         {
-            query = query.Where(item => item.CategoryId.HasValue && categoryIds.Contains(item.CategoryId.Value));
+            query = query.Where(item => (item.CategoryId.HasValue && categoryIds.Contains(item.CategoryId.Value)) || _dbContext.Transactions.Any(child => child.UserId == userId && child.ParentTransactionId == item.Id && child.CategoryId.HasValue && categoryIds.Contains(child.CategoryId.Value)));
         }
 
         if (type.HasValue)

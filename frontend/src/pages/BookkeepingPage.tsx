@@ -1,3 +1,5 @@
+import { ExistingRuleReview } from "../components/ExistingRuleReview";
+import { PayeeManager } from "../components/PayeeManager";
 import { TransferSuggestions } from "../components/TransferSuggestions";
 import { useEffect, useMemo, useState } from "react";
 import { apiClient } from "../api/client";
@@ -24,8 +26,6 @@ export function BookkeepingPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [statementDate, setStatementDate] = useState(new Date().toISOString().slice(0, 10));
   const [statementBalance, setStatementBalance] = useState("");
-  const [payeeName, setPayeeName] = useState("");
-  const [defaultCategory, setDefaultCategory] = useState("");
   const [bulkPayee, setBulkPayee] = useState("");
   const [bulkType, setBulkType] = useState("");
   const [bulkCategory, setBulkCategory] = useState("");
@@ -53,15 +53,9 @@ export function BookkeepingPage() {
   return <div className="page-stack bookkeeping-page">
     <PageHeader eyebrow="Bookkeeping" title="Balance your books" description="Keep payees, check cleared transactions, link card payments, and reconcile against your statement." />
     {error && <p className="error-banner" role="alert">{error}</p>}{message && <p role="status">{message}</p>}
+    <ExistingRuleReview token={token} categories={categories} onChanged={load} />
     <TransferSuggestions token={token} onChanged={load} />
-    <SectionCard title="Payees">
-      <form className="form-grid" onSubmit={e => { e.preventDefault(); void run(async () => { await apiClient.bookkeeping(token, "payees", "POST", { name: payeeName, defaultCategoryId: defaultCategory || null }); setPayeeName(""); setMessage("Payee saved."); }); }}>
-        <label>Payee name<input required maxLength={120} value={payeeName} onChange={e => setPayeeName(e.target.value)} /></label>
-        <label>Default category<select value={defaultCategory} onChange={e => setDefaultCategory(e.target.value)}><option value="">None</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
-        <button disabled={busy}>Save payee</button>
-      </form>
-      <p>{payees.map(p => p.name).join(" · ") || "Add payees to reuse names and categories."}</p>
-    </SectionCard>
+    <PayeeManager token={token} categories={categories} onChanged={load} />
     <SectionCard title="Account register">
       <label>Account<select value={accountId} onChange={e => setAccountId(e.target.value)}><option value="">Choose account</option>{accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
       {register && <>

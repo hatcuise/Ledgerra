@@ -20,7 +20,8 @@ public sealed record BackupArchiveResponse(
     IReadOnlyList<RecurringTransactionTemplate>? RecurringTemplates = null,
     IReadOnlyList<CategorizationRule>? CategorizationRules = null,
     IReadOnlyList<UserExchangeRate>? ExchangeRates = null,
-    IReadOnlyList<TransferMatch>? TransferMatches = null);
+    IReadOnlyList<TransferMatch>? TransferMatches = null,
+    IReadOnlyList<SavedLedgerView>? SavedLedgerViews = null);
 
 public sealed record BackupAccountResponse(
     Guid Id,
@@ -35,7 +36,7 @@ public sealed record BackupAccountResponse(
     bool ExcludeFromBudget = false,
     bool ExcludeFromNetWorth = false);
 
-public sealed record BackupCategoryResponse(Guid Id, string Name, string Kind, string? Color);
+public sealed record BackupCategoryResponse(Guid Id, string Name, string Kind, string? Color, Guid? ParentCategoryId = null);
 
 public sealed record BackupTransactionResponse(
     Guid Id,

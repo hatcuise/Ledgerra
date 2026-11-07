@@ -406,6 +406,7 @@ export const apiClient = {
         matchField: rule.matchField,
         matchOperator: rule.matchOperator,
         matchValue: rule.matchValue,
+        ...(rule.conditions ? { conditions: rule.conditions } : {}),
         assignCategoryId: rule.assignCategoryId,
         assignTransactionType: rule.assignTransactionType,
         priority: rule.priority,
@@ -506,6 +507,13 @@ export const apiClient = {
       type: string;
       occurredOnUtc: string;
       note?: string;
+      splitLines?: Array<{ categoryId: string; amount: number }>;
+      updateMetadata?: boolean;
+      payeeId?: string;
+      reference?: string;
+      tags?: string;
+      paymentMethod?: string;
+      status?: string;
     }
   ) {
     return request<Transaction>("/api/transactions", {
@@ -525,6 +533,13 @@ export const apiClient = {
       type: string;
       occurredOnUtc: string;
       note?: string;
+      splitLines?: Array<{ categoryId: string; amount: number }>;
+      updateMetadata?: boolean;
+      payeeId?: string;
+      reference?: string;
+      tags?: string;
+      paymentMethod?: string;
+      status?: string;
     }
   ) {
     return request<Transaction>(`/api/transactions/${transactionId}`, {

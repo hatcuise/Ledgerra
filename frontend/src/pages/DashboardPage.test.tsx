@@ -50,6 +50,7 @@ vi.mock("../state/AuthContext", () => ({
 
 vi.mock("../api/client", () => ({
   apiClient: {
+    bookkeeping: vi.fn().mockResolvedValue([]),
     createCategory: mocks.createCategory,
     createTransaction: mocks.createTransaction
   }

@@ -83,6 +83,12 @@ public sealed class CategoryStore : ICategoryStore
             return CategoryDeleteStatus.UsedByImportRules;
         }
 
+        if (await _dbContext.Categories.AnyAsync(x => x.UserId == userId && x.ParentCategoryId == categoryId, cancellationToken)
+            || await _dbContext.Payees.AnyAsync(x => x.UserId == userId && x.DefaultCategoryId == categoryId, cancellationToken)
+            || await _dbContext.RecurringTransactionTemplates.AnyAsync(x => x.UserId == userId && x.CategoryId == categoryId, cancellationToken)
+            || await _dbContext.BudgetCategoryLimits.AnyAsync(x => x.CategoryId == categoryId, cancellationToken)
+            || await _dbContext.TransferMatches.AnyAsync(x => x.UserId == userId && (x.OutgoingCategoryId == categoryId || x.IncomingCategoryId == categoryId), cancellationToken))
+            return CategoryDeleteStatus.UsedByDependencies;
         _dbContext.Categories.Remove(category);
         try
         {

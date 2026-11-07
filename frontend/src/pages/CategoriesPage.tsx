@@ -1,3 +1,4 @@
+import { CategoryOrganization } from "../components/CategoryOrganization";
 import { FormEvent, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { apiClient } from "../api/client";
 import { useLedgerraData } from "../hooks/useLedgerraData";
@@ -992,6 +993,8 @@ export function CategoriesPage() {
           </div>
         )}
       />
+
+      {auth?.accessToken && <CategoryOrganization token={auth.accessToken} categories={categories} onChanged={refresh} />}
 
       <section className="category-overview-strip" aria-label={copy.totalCategories}>
         <div className="category-overview-cell">

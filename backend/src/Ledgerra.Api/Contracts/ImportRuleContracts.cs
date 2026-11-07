@@ -1,3 +1,4 @@
+using Ledgerra.Domain.Imports;
 using System.ComponentModel.DataAnnotations;
 
 namespace Ledgerra.Api.Contracts;
@@ -13,10 +14,12 @@ public sealed record ImportRuleResponse(
     int Priority,
     bool IsActive,
     DateTime CreatedAtUtc,
-    DateTime UpdatedAtUtc);
+    DateTime UpdatedAtUtc,
+    IReadOnlyList<ImportRuleCondition>? Conditions = null);
 
 public sealed class UpsertImportRuleRequest
 {
+    public IReadOnlyList<ImportRuleCondition>? Conditions { get; init; }
     [Required, MaxLength(120)]
     public string Name { get; init; } = string.Empty;
 

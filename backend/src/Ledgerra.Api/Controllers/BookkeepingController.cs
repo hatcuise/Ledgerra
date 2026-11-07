@@ -92,12 +92,22 @@ public sealed class BookkeepingController(LedgerraDbContext db, IMonthlyAccountB
             payee = await db.Payees.SingleOrDefaultAsync(x => x.UserId == UserId && x.Id == payeeId, ct);
             if (payee is null) return NotFound();
         }
-        var categoryId = request.CategoryId ?? entry.CategoryId;
-        if (categoryId is Guid category && !await db.Categories.AnyAsync(x => x.UserId == UserId && x.Id == category, ct)) return NotFound();
-        if (entry.TransferGroupId is null && entry.SplitGroupId is null) entry.CategoryId = categoryId ?? payee?.DefaultCategoryId;
+        var categoryId = request.CategoryId ?? entry.CategoryId ?? payee?.DefaultCategoryId;
+        if (entry.TransferGroupId is null && entry.SplitGroupId is null && categoryId.HasValue)
+        {
+            var category = await db.Categories.SingleOrDefaultAsync(x => x.UserId == UserId && x.Id == categoryId, ct);
+            if (category is null) return NotFound();
+            var expected = entry.Type == TransactionType.Income ? Ledgerra.Domain.Categories.CategoryKind.Income : Ledgerra.Domain.Categories.CategoryKind.Expense;
+            if (category.Kind != expected)
+            {
+                if (request.CategoryId.HasValue) return BadRequest(new ProblemDetails { Title = "Category kind must match the transaction type." });
+                categoryId = null;
+            }
+        }
+        if (entry.TransferGroupId is null && entry.SplitGroupId is null) entry.CategoryId = categoryId;
         metadata ??= new EntryMetadata { Id = id, UserId = UserId };
         if (db.Entry(metadata).State == EntityState.Detached) db.EntryMetadata.Add(metadata);
-        metadata.PayeeId = request.PayeeId; metadata.Status = request.Status; metadata.Reference = request.Reference; metadata.Tags = request.Tags;
+        metadata.PayeeId = request.PayeeId; metadata.Status = request.Status; metadata.Reference = request.Reference; metadata.Tags = request.Tags; metadata.PaymentMethod = request.PaymentMethod;
         await db.SaveChangesAsync(ct); if (tx is not null) await tx.CommitAsync(ct); return Ok(metadata);
     }
 
@@ -119,9 +129,18 @@ public sealed class BookkeepingController(LedgerraDbContext db, IMonthlyAccountB
                 || entries.Any(x => x.TransferGroupId != null || x.SplitGroupId != null)) return BadRequest(new ProblemDetails { Title = "Reclassification supports ordinary entries only; edit splits or transfers separately." });
             newType = parsed;
         }
+        var categories = await db.Categories.Where(x => x.UserId == UserId).ToDictionaryAsync(x => x.Id, ct);
+        if (request.CategoryId.HasValue && entries.Any(x => x.TransferGroupId == null && x.SplitGroupId == null
+            && categories[request.CategoryId.Value].Kind != ((newType ?? x.Type) == TransactionType.Income ? Ledgerra.Domain.Categories.CategoryKind.Income : Ledgerra.Domain.Categories.CategoryKind.Expense)))
+            return BadRequest(new ProblemDetails { Title = "Category kind must match every selected transaction's resulting type." });
         foreach (var entry in entries)
         {
-            if (newType.HasValue) entry.Type = newType.Value;
+            if (newType.HasValue)
+            {
+                entry.Type = newType.Value;
+                if (entry.CategoryId.HasValue && categories.TryGetValue(entry.CategoryId.Value, out var oldCategory)
+                    && oldCategory.Kind != (entry.Type == TransactionType.Income ? Ledgerra.Domain.Categories.CategoryKind.Income : Ledgerra.Domain.Categories.CategoryKind.Expense)) entry.CategoryId = null;
+            }
             if (request.CategoryId.HasValue && entry.TransferGroupId == null && entry.SplitGroupId == null) entry.CategoryId = request.CategoryId;
             if (request.PayeeId.HasValue)
             {
@@ -259,6 +278,7 @@ public sealed class ProfileRequest { [Required, MaxLength(120)] public string Na
 public sealed class PayeeRequest { [Required, MaxLength(120)] public string Name { get; init; } = ""; public Guid? DefaultCategoryId { get; init; } }
 public sealed class EntryRequest
 {
+    [MaxLength(40)] public string PaymentMethod { get; init; } = "";
     public Guid? PayeeId { get; init; }
     public Guid? CategoryId { get; init; }
     [Required] public string Status { get; init; } = "Uncleared";

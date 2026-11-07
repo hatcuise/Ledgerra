@@ -50,6 +50,7 @@ public sealed class LedgerraDbContext : DbContext
     public DbSet<UserExchangeRate> ExchangeRates => Set<UserExchangeRate>();
 
     public DbSet<TransferMatch> TransferMatches => Set<TransferMatch>();
+    public DbSet<SavedLedgerView> SavedLedgerViews => Set<SavedLedgerView>();
     public DbSet<ImportProfile> ImportProfiles => Set<ImportProfile>();
     public DbSet<Payee> Payees => Set<Payee>();
     public DbSet<EntryMetadata> EntryMetadata => Set<EntryMetadata>();
@@ -57,6 +58,8 @@ public sealed class LedgerraDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<SavedLedgerView>(b => { b.HasKey(x => x.Id); b.Property(x => x.Name).HasMaxLength(120); b.Property(x => x.Query).HasMaxLength(4000); b.HasIndex(x => new { x.UserId, x.Name }).IsUnique(); });
+        modelBuilder.Entity<EntryMetadata>().Property(x => x.PaymentMethod).HasMaxLength(40);
         modelBuilder.Entity<TransferMatch>(b => b.HasKey(x => x.Id));
         modelBuilder.Entity<ImportProfile>(b => { b.HasKey(x => x.Id); b.Property(x => x.Name).HasMaxLength(120); b.Property(x => x.SettingsJson).HasMaxLength(8000); b.HasIndex(x => new { x.UserId, x.Name }).IsUnique(); });
         modelBuilder.Entity<Payee>(b => { b.HasKey(x => x.Id); b.Property(x => x.Name).HasMaxLength(120); b.HasIndex(x => new { x.UserId, x.Name }).IsUnique(); });
@@ -278,6 +281,7 @@ public sealed class LedgerraDbContext : DbContext
             builder.Property(rule => rule.Name).HasMaxLength(120);
             builder.Property(rule => rule.MatchField).HasConversion<string>().HasMaxLength(32);
             builder.Property(rule => rule.MatchOperator).HasConversion<string>().HasMaxLength(32);
+            builder.Property(rule => rule.ConditionsJson).HasMaxLength(4000);
             builder.Property(rule => rule.MatchValue).HasMaxLength(200);
             builder.Property(rule => rule.AssignTransactionType).HasConversion<string>().HasMaxLength(32);
             builder.HasOne(rule => rule.User)

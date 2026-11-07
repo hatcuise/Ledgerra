@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Ledgerra.Domain.Imports;
@@ -49,7 +50,7 @@ public sealed class ImportCategorizationRuleMatcher : IImportCategorizationRuleM
             // A merchant's expense-category rule also categorizes its refunds;
             // changing a refund to an expense must use an explicit type rule.
             Type = draft.Type.Equals("Refund", StringComparison.OrdinalIgnoreCase)
-                && rule.AssignTransactionType == TransactionType.Expense && rule.MatchField != ImportRuleMatchField.Type
+                && rule.AssignTransactionType == TransactionType.Expense && rule.MatchField != ImportRuleMatchField.Type && !(JsonSerializer.Deserialize<List<ImportRuleCondition>>(rule.ConditionsJson) ?? []).Any(x => x.Field.Equals("Type", StringComparison.OrdinalIgnoreCase))
                 ? "Refund" : rule.AssignTransactionType.ToString(),
             AppliedRuleId = rule.Id,
             AppliedRuleName = rule.Name
@@ -57,6 +58,19 @@ public sealed class ImportCategorizationRuleMatcher : IImportCategorizationRuleM
     }
 
     private static bool Matches(ImportDraftReviewItem draft, CategorizationRule rule)
+    {
+        if (!MatchesSingle(draft, rule)) return false;
+        try
+        {
+            var conditions = JsonSerializer.Deserialize<List<ImportRuleCondition>>(rule.ConditionsJson) ?? [];
+            return conditions.All(x => Enum.TryParse<ImportRuleMatchField>(x.Field, true, out var field)
+                && Enum.TryParse<ImportRuleMatchOperator>(x.Operator, true, out var op)
+                && MatchesSingle(draft, new CategorizationRule { MatchField = field, MatchOperator = op, MatchValue = x.Value }));
+        }
+        catch (JsonException) { return false; }
+    }
+
+    private static bool MatchesSingle(ImportDraftReviewItem draft, CategorizationRule rule)
     {
         return rule.MatchField switch
         {

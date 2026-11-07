@@ -26,4 +26,4 @@ public sealed class UpdateCategoryRequest
     public bool IsSystem { get; init; }
 }
 
-public sealed record CategoryResponse(Guid Id, string Name, string Kind, string? Color, bool IsSystem);
+public sealed record CategoryResponse(Guid Id, string Name, string Kind, string? Color, bool IsSystem, Guid? ParentCategoryId = null);

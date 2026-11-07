@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Ledgerra.Api.Contracts;
 
-public sealed class CreateTransactionRequest
+public sealed class CreateTransactionRequest : TransactionMetadataRequest
 {
     [Required]
     public Guid AccountId { get; init; }
@@ -28,7 +28,7 @@ public sealed class CreateTransactionRequest
     public IReadOnlyList<TransactionSplitLineRequest>? SplitLines { get; init; }
 }
 
-public sealed class UpdateTransactionRequest
+public sealed class UpdateTransactionRequest : TransactionMetadataRequest
 {
     public Guid? CategoryId { get; init; }
 
@@ -55,6 +55,17 @@ public sealed class MoveTransactionAccountRequest
 {
     [Required]
     public Guid DestinationAccountId { get; init; }
+}
+
+public abstract class TransactionMetadataRequest
+{
+    // Null leaves existing metadata intact for older clients.
+    public Guid? PayeeId { get; init; }
+    public bool UpdateMetadata { get; init; }
+    [MaxLength(120)] public string Reference { get; init; } = "";
+    [MaxLength(400)] public string Tags { get; init; } = "";
+    [MaxLength(40)] public string PaymentMethod { get; init; } = "";
+    public string Status { get; init; } = "Uncleared";
 }
 
 public sealed class TransactionSplitLineRequest

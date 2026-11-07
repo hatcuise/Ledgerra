@@ -99,6 +99,9 @@ public sealed class CategoriesController : ControllerBase
             return NotFound();
         }
 
+        if (result == CategoryDeleteStatus.UsedByDependencies)
+            return Conflict(new ProblemDetails { Title = "Category is used by other records. Merge it into another category instead." });
+
         if (result == CategoryDeleteStatus.UsedByImportRules)
         {
             return BadRequest(new ProblemDetails
@@ -113,6 +116,6 @@ public sealed class CategoriesController : ControllerBase
 
     private static CategoryResponse MapCategory(CategoryDetails category)
     {
-        return new CategoryResponse(category.Id, category.Name, category.Kind, category.Color, category.IsSystem);
+        return new CategoryResponse(category.Id, category.Name, category.Kind, category.Color, category.IsSystem, category.ParentCategoryId);
     }
 }

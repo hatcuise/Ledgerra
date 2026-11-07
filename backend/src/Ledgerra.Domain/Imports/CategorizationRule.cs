@@ -16,6 +16,8 @@ public sealed class CategorizationRule
 
     public ImportRuleMatchOperator MatchOperator { get; set; } = ImportRuleMatchOperator.Contains;
 
+    public string ConditionsJson { get; set; } = "[]";
+
     public string MatchValue { get; set; } = string.Empty;
 
     public Guid AssignCategoryId { get; set; }
@@ -34,3 +36,5 @@ public sealed class CategorizationRule
 
     public Category? AssignCategory { get; set; }
 }
+
+public sealed record ImportRuleCondition(string Field, string Operator, string Value);

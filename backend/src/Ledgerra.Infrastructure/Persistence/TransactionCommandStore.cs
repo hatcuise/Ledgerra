@@ -168,7 +168,7 @@ public sealed class TransactionCommandStore : ITransactionCommandStore
         Ledgerra.Domain.Bookkeeping.EntryMetadata? replacementMetadata = metadata is null ? null : new()
         {
             Id = replacement.Id, UserId = metadata.UserId, ExternalKey = metadata.ExternalKey, PayeeId = metadata.PayeeId,
-            Reference = metadata.Reference, Tags = metadata.Tags, Status = metadata.Status
+            Reference = metadata.Reference, Tags = metadata.Tags, Status = metadata.Status, PaymentMethod = metadata.PaymentMethod
         };
         if (metadata is not null) _dbContext.EntryMetadata.Remove(metadata);
         await RemoveExistingAsync(existing, cancellationToken);

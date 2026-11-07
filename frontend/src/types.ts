@@ -56,6 +56,7 @@ export type AiSettings = {
 };
 
 export type Category = {
+  parentCategoryId?: string | null;
   id: string;
   name: string;
   kind: string;
@@ -153,6 +154,7 @@ export type MonthlyReportAnalysisJob = {
 };
 
 export type ImportRule = {
+  conditions?: Array<{ field: string; operator: string; value: string }>;
   id: string;
   name: string;
   matchField: string;
