@@ -1,3 +1,4 @@
+import { TransferSuggestions } from "../components/TransferSuggestions";
 import { useEffect, useMemo, useState } from "react";
 import { apiClient } from "../api/client";
 import { useAuth } from "../state/AuthContext";
@@ -52,6 +53,7 @@ export function BookkeepingPage() {
   return <div className="page-stack bookkeeping-page">
     <PageHeader eyebrow="Bookkeeping" title="Balance your books" description="Keep payees, check cleared transactions, link card payments, and reconcile against your statement." />
     {error && <p className="error-banner" role="alert">{error}</p>}{message && <p role="status">{message}</p>}
+    <TransferSuggestions token={token} onChanged={load} />
     <SectionCard title="Payees">
       <form className="form-grid" onSubmit={e => { e.preventDefault(); void run(async () => { await apiClient.bookkeeping(token, "payees", "POST", { name: payeeName, defaultCategoryId: defaultCategory || null }); setPayeeName(""); setMessage("Payee saved."); }); }}>
         <label>Payee name<input required maxLength={120} value={payeeName} onChange={e => setPayeeName(e.target.value)} /></label>

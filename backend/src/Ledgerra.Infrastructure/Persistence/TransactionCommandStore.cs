@@ -1,3 +1,4 @@
+using System.Data;
 using Ledgerra.Application.Transactions;
 using Ledgerra.Domain.Transactions;
 using Microsoft.EntityFrameworkCore;
@@ -7,10 +8,12 @@ namespace Ledgerra.Infrastructure.Persistence;
 public sealed class TransactionCommandStore : ITransactionCommandStore
 {
     private readonly LedgerraDbContext _dbContext;
+    private readonly TransferRecognitionService _transfers;
 
-    public TransactionCommandStore(LedgerraDbContext dbContext)
+    public TransactionCommandStore(LedgerraDbContext dbContext, TransferRecognitionService transfers)
     {
         _dbContext = dbContext;
+        _transfers = transfers;
     }
 
     public Task<bool> AccountExistsAsync(Guid userId, Guid accountId, CancellationToken cancellationToken)
@@ -92,6 +95,7 @@ public sealed class TransactionCommandStore : ITransactionCommandStore
         CancellationToken cancellationToken,
         IReadOnlyList<TransactionSplitLine>? splitLines = null)
     {
+        await using var tx = _dbContext.Database.IsRelational() && _dbContext.Database.CurrentTransaction is null ? await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken) : null;
         EnsureUtc(transaction.OccurredOnUtc);
 
         var splitTransactions = BuildSplitTransactions(transaction, splitLines);
@@ -102,6 +106,8 @@ public sealed class TransactionCommandStore : ITransactionCommandStore
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        await _transfers.RecognizeAsync(transaction.UserId, new[] { transaction.Id }, ct: cancellationToken);
+        if (tx is not null) await tx.CommitAsync(cancellationToken);
         return transaction;
     }
 
@@ -155,17 +161,29 @@ public sealed class TransactionCommandStore : ITransactionCommandStore
         CancellationToken cancellationToken,
         IReadOnlyList<TransactionSplitLine>? splitLines = null)
     {
+        await using var tx = _dbContext.Database.IsRelational() && _dbContext.Database.CurrentTransaction is null ? await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken) : null;
         EnsureUtc(replacement.OccurredOnUtc);
 
+        var metadata = await _dbContext.EntryMetadata.SingleOrDefaultAsync(m => m.UserId == existing.UserId && m.Id == existing.Id, cancellationToken);
+        Ledgerra.Domain.Bookkeeping.EntryMetadata? replacementMetadata = metadata is null ? null : new()
+        {
+            Id = replacement.Id, UserId = metadata.UserId, ExternalKey = metadata.ExternalKey, PayeeId = metadata.PayeeId,
+            Reference = metadata.Reference, Tags = metadata.Tags, Status = metadata.Status
+        };
+        if (metadata is not null) _dbContext.EntryMetadata.Remove(metadata);
         await RemoveExistingAsync(existing, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
         var splitTransactions = BuildSplitTransactions(replacement, splitLines);
         _dbContext.Transactions.Add(replacement);
+        if (replacementMetadata is not null) _dbContext.EntryMetadata.Add(replacementMetadata);
         if (splitTransactions.Count > 0)
         {
             _dbContext.Transactions.AddRange(splitTransactions);
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        await _transfers.RecognizeAsync(replacement.UserId, new[] { replacement.Id }, ct: cancellationToken);
+        if (tx is not null) await tx.CommitAsync(cancellationToken);
         return replacement;
     }
 

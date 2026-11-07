@@ -157,6 +157,11 @@ public sealed class SettingsController : ControllerBase
         _dbContext.RecurringTransactionTemplates.RemoveRange(_dbContext.RecurringTransactionTemplates.Where(template => template.UserId == userId));
         _dbContext.MonthlyAccountBalanceSnapshots.RemoveRange(_dbContext.MonthlyAccountBalanceSnapshots.Where(snapshot => snapshot.UserId == userId));
         _dbContext.ExchangeRates.RemoveRange(_dbContext.ExchangeRates.Where(rate => rate.UserId == userId));
+        _dbContext.TransferMatches.RemoveRange(_dbContext.TransferMatches.Where(x => x.UserId == userId));
+        _dbContext.EntryMetadata.RemoveRange(_dbContext.EntryMetadata.Where(x => x.UserId == userId));
+        _dbContext.Reconciliations.RemoveRange(_dbContext.Reconciliations.Where(x => x.UserId == userId));
+        _dbContext.Payees.RemoveRange(_dbContext.Payees.Where(x => x.UserId == userId));
+        _dbContext.ImportProfiles.RemoveRange(_dbContext.ImportProfiles.Where(x => x.UserId == userId));
         _dbContext.Transactions.RemoveRange(_dbContext.Transactions.Where(transaction => transaction.UserId == userId));
         _dbContext.CategorizationRules.RemoveRange(_dbContext.CategorizationRules.Where(rule => rule.UserId == userId));
         _dbContext.SavingsGoals.RemoveRange(_dbContext.SavingsGoals.Where(goal => goal.UserId == userId));

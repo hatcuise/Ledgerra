@@ -19,9 +19,10 @@ public sealed record MonthlyReportDraftInput(
     string? Note,
     string? PayeeName = null,
     string? Reference = null,
-    string? Tags = null);
+    string? Tags = null,
+    string? ExternalKey = null);
 
-public sealed record MonthlyReportDraftDuplicateReview(string SourceId, bool IsLikelyDuplicate);
+public sealed record MonthlyReportDraftDuplicateReview(string SourceId, bool IsLikelyDuplicate, bool IdentityDuplicate = false);
 
 public interface IMonthlyReportImportCommitStore
 {
@@ -86,6 +87,9 @@ public sealed class CommitMonthlyReportDraftsCommandHandler
 
         var acceptedDuplicateSourceIds = command.AcceptedDuplicateSourceIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var reviewedDrafts = await _duplicateReviewer.MarkDuplicatesAsync(command.UserId, command.Transactions, cancellationToken);
+
+        if (reviewedDrafts.Any(d => d.IdentityDuplicate))
+            return CommitMonthlyReportDraftsResult.ValidationError("externalKey", "A bank transaction identity was already imported or repeated in this batch. Remove the duplicate rows.");
 
         var unacceptedDuplicate = reviewedDrafts.FirstOrDefault(draft =>
             draft.IsLikelyDuplicate && !acceptedDuplicateSourceIds.Contains(draft.SourceId));

@@ -19,6 +19,12 @@ public static class BookkeepingSchemaInitializer
                 "Id" uuid PRIMARY KEY REFERENCES "Transactions" ("Id") ON DELETE CASCADE, "UserId" uuid NOT NULL,
                 "PayeeId" uuid NULL, "Reference" varchar(120) NOT NULL, "Tags" varchar(400) NOT NULL,
                 "Status" varchar(20) NOT NULL, "ReconciliationId" uuid NULL);
+            ALTER TABLE "EntryMetadata" ADD COLUMN IF NOT EXISTS "ExternalKey" varchar(64) NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS "IX_EntryMetadata_UserId_ExternalKey" ON "EntryMetadata" ("UserId", "ExternalKey") WHERE "ExternalKey" IS NOT NULL;
+            CREATE TABLE IF NOT EXISTS "TransferMatches" (
+                "Id" uuid PRIMARY KEY, "UserId" uuid NOT NULL, "OutgoingId" uuid NOT NULL, "IncomingId" uuid NOT NULL,
+                "OutgoingCategoryId" uuid NULL, "IncomingCategoryId" uuid NULL, "OutgoingType" integer NOT NULL,
+                "IncomingType" integer NOT NULL, "Automatic" boolean NOT NULL, "MatchedAtUtc" timestamp with time zone NOT NULL);
             CREATE TABLE IF NOT EXISTS "Reconciliations" (
                 "Id" uuid PRIMARY KEY, "UserId" uuid NOT NULL, "AccountId" uuid NOT NULL, "StatementDate" date NOT NULL,
                 "StatementBalance" numeric(18,2) NOT NULL, "CompletedAtUtc" timestamp with time zone NOT NULL);

@@ -465,6 +465,9 @@ public sealed class MoveTransactionAccountCommandHandler
             return TransactionCommandResult.NotFound("Destination account not found");
         }
 
+        if (!await _transactionCommandStore.AccountsShareCurrencyAsync(command.UserId, existing.AccountId, command.DestinationAccountId, cancellationToken))
+            return TransactionCommandResult.ValidationError("destinationAccountId", "Moving a transaction cannot change its currency. Choose an account with the same currency.");
+
         var previousAccountId = existing.AccountId;
         var transaction = await _transactionCommandStore.MoveToAccountAsync(existing, command.DestinationAccountId, cancellationToken);
 

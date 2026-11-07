@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Ledgerra.Api.Controllers;
 
 [ApiController, Authorize, Route("api/bookkeeping")]
-public sealed class BookkeepingController(LedgerraDbContext db, IMonthlyAccountBalanceSnapshotService snapshots) : ControllerBase
+public sealed class BookkeepingController(LedgerraDbContext db, IMonthlyAccountBalanceSnapshotService snapshots, TransferRecognitionService transferRecognition) : ControllerBase
 {
     private Guid UserId => User.GetRequiredUserId();
 
@@ -142,6 +142,53 @@ public sealed class BookkeepingController(LedgerraDbContext db, IMonthlyAccountB
         return NoContent();
     }
 
+    [HttpGet("transfers/candidates")]
+    public async Task<IActionResult> TransferCandidates([FromQuery, Range(0, 7)] int dayWindow = 3, CancellationToken ct = default)
+    {
+        try { return Ok(await transferRecognition.FindAsync(UserId, dayWindow, ct)); }
+        catch (InvalidOperationException e) { return BadRequest(new ProblemDetails { Title = e.Message }); }
+    }
+
+    [HttpPost("transfers/recognize")]
+    public async Task<IActionResult> RecognizeTransfers([FromQuery, Range(0, 7)] int dayWindow = 3, CancellationToken ct = default)
+    {
+        try { return Ok(new { Linked = await transferRecognition.RecognizeAsync(UserId, null, dayWindow, ct) }); }
+        catch (InvalidOperationException e) { return BadRequest(new ProblemDetails { Title = e.Message }); }
+    }
+
+    [HttpGet("transfers/recognized")]
+    public async Task<IActionResult> RecognizedTransfers(CancellationToken ct)
+    {
+        var history = await db.TransferMatches.Where(x => x.UserId == UserId).OrderByDescending(x => x.MatchedAtUtc).ToListAsync(ct);
+        var ids = history.SelectMany(x => new[] { x.OutgoingId, x.IncomingId }).ToArray();
+        var entries = await db.Transactions.Include(x => x.Account).Where(x => x.UserId == UserId && ids.Contains(x.Id)).ToDictionaryAsync(x => x.Id, ct);
+        return Ok(history.Where(h => entries.ContainsKey(h.OutgoingId) && entries.ContainsKey(h.IncomingId)
+            && entries[h.OutgoingId].TransferGroupId == h.Id && entries[h.IncomingId].TransferGroupId == h.Id)
+            .Select(h => new { h.Id, h.Automatic, h.MatchedAtUtc, FromAccount = entries[h.OutgoingId].Account!.Name,
+                ToAccount = entries[h.IncomingId].Account!.Name, entries[h.OutgoingId].Amount, entries[h.OutgoingId].Account!.CurrencyCode }));
+    }
+
+    [HttpPost("transfers/{groupId:guid}/unlink")]
+    public async Task<IActionResult> UnlinkTransfer(Guid groupId, CancellationToken ct)
+    {
+        await using var tx = db.Database.IsRelational() ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct) : null;
+        var history = await db.TransferMatches.SingleOrDefaultAsync(h => h.UserId == UserId && h.Id == groupId, ct);
+        if (history is null) return NotFound();
+        var entries = await db.Transactions.Where(t => t.UserId == UserId && t.TransferGroupId == groupId).ToListAsync(ct);
+        if (entries.Count != 2 || !entries.Any(t => t.Id == history.OutgoingId) || !entries.Any(t => t.Id == history.IncomingId)) return Conflict();
+        var ids = entries.Select(t => t.Id).ToArray();
+        if (await db.EntryMetadata.AnyAsync(m => m.UserId == UserId && ids.Contains(m.Id) && m.Status == "Reconciled", ct)) return Conflict(new ProblemDetails { Title = "Reopen the reconciled statement before undoing this match." });
+        var categories = await db.Categories.Where(c => c.UserId == UserId).Select(c => c.Id).ToListAsync(ct);
+        foreach (var entry in entries)
+        {
+            entry.TransferGroupId = null;
+            entry.Type = entry.Id == history.OutgoingId ? history.OutgoingType : history.IncomingType;
+            var originalCategory = entry.Id == history.OutgoingId ? history.OutgoingCategoryId : history.IncomingCategoryId;
+            entry.CategoryId = originalCategory.HasValue && categories.Contains(originalCategory.Value) ? originalCategory : null;
+        }
+        db.TransferMatches.Remove(history); await db.SaveChangesAsync(ct); if (tx is not null) await tx.CommitAsync(ct); return NoContent();
+    }
+
     [HttpPost("transfers/link")]
     public async Task<IActionResult> LinkTransfer(LinkTransferRequest request, CancellationToken ct)
     {
@@ -156,7 +203,7 @@ public sealed class BookkeepingController(LedgerraDbContext db, IMonthlyAccountB
             || outgoing.Amount != incoming.Amount || TransactionSemantics.BalanceAmount(outgoing) >= 0 || TransactionSemantics.BalanceAmount(incoming) <= 0
             || entries.Any(x => x.TransferGroupId != null || x.SplitGroupId != null || x.ParentTransactionId != null))
             return BadRequest(new ProblemDetails { Title = "Select an outgoing and incoming transaction of equal amount in different accounts with the same currency." });
-        var group = Guid.NewGuid(); outgoing.Type = TransactionType.TransferOut; incoming.Type = TransactionType.TransferIn;
+        var group = Guid.NewGuid(); db.TransferMatches.Add(TransferRecognitionService.History(group, UserId, outgoing, incoming, false)); outgoing.Type = TransactionType.TransferOut; incoming.Type = TransactionType.TransferIn;
         outgoing.TransferGroupId = incoming.TransferGroupId = group; outgoing.CategoryId = incoming.CategoryId = null;
         await db.SaveChangesAsync(ct); if (tx is not null) await tx.CommitAsync(ct); return Ok(new { TransferGroupId = group });
     }

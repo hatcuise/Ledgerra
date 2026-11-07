@@ -1,3 +1,4 @@
+import { NativeImportPanel } from "../components/NativeImportPanel";
 import { CsvImportSettings } from "../components/CsvImportSettings";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { apiClient } from "../api/client";
@@ -186,6 +187,7 @@ export function ImportsPage() {
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const nextFile = event.target.files?.[0] ?? null;
+    clearReviewSession();
     setFile(nextFile);
     setInvertAmounts(false);
     setCsvHeaders([]);
@@ -447,6 +449,7 @@ export function ImportsPage() {
         description={t("imports.description")}
       />
 
+      <NativeImportPanel accounts={accounts} />
       <SectionCard title={t("imports.analyzeReport")}>
         <form className="stack-form" onSubmit={handleAnalyze}>
           {error ? <p className="error-banner">{error}</p> : null}
@@ -685,6 +688,7 @@ export function ImportsPage() {
                   <label>Reference<input aria-label={`Reference for ${draft.sourceId}`} maxLength={120} value={draft.reference ?? ""} onChange={e => updateDraft(draft.sourceId, { reference: e.target.value })} /></label>
                   <label>Tags<input aria-label={`Tags for ${draft.sourceId}`} maxLength={400} value={draft.tags ?? ""} onChange={e => updateDraft(draft.sourceId, { tags: e.target.value })} /></label>
                 </div>}
+                <small>{accounts.find(a => a.id === draft.accountId)?.name}</small>
                 <strong className="import-confidence">{Math.round(draft.confidence * 100)}%</strong>
                 <div className="import-review-flags">
                   {draft.appliedRuleName ? <span className="status-badge success">{draft.appliedRuleName}</span> : null}

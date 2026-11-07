@@ -66,6 +66,9 @@ Ledgerra is a self-hosted personal finance tracker built with an ASP.NET Core AP
 
 Saved bank CSV profiles, explicit refunds, payees, statement reconciliation, and
 credit card payment matching are described in [the bookkeeping guide](docs/bookkeeping.md).
+Native QIF/OFX/QFX/HomeBank transaction imports and reversible transfer recognition
+use the same review workflow. See the [HomeBank gap audit](docs/audits/homebank-5.10.3-gap-analysis.md)
+for the complete capability inventory and phased roadmap.
 
 ## Local Development
 

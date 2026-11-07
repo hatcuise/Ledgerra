@@ -109,6 +109,7 @@ export type RecurringGenerationResult = {
 };
 
 export type MonthlyReportDraftTransaction = {
+  externalKey?: string | null;
   payeeName?: string | null;
   reference?: string | null;
   tags?: string | null;

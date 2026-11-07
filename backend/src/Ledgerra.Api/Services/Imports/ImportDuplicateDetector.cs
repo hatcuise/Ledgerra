@@ -30,6 +30,8 @@ public sealed class ImportDuplicateDetector : IImportDuplicateDetector
             .OfType<TransactionType>()
             .Distinct()
             .ToList();
+        if (types.Contains(TransactionType.Income)) types.Add(TransactionType.TransferIn);
+        if (types.Contains(TransactionType.Expense)) types.Add(TransactionType.TransferOut);
         var minDate = drafts.Min(draft => draft.OccurredOnUtc.ToUniversalTime().Date);
         var maxExclusiveDate = drafts.Max(draft => draft.OccurredOnUtc.ToUniversalTime().Date).AddDays(1);
 
@@ -70,7 +72,7 @@ public sealed class ImportDuplicateDetector : IImportDuplicateDetector
 
         var duplicate = existing.FirstOrDefault(transaction =>
             transaction.AccountId == draft.AccountId &&
-            transaction.Type == draftType.Value &&
+            (transaction.Type == draftType.Value || (draftType.Value == TransactionType.Income && transaction.Type == TransactionType.TransferIn) || (draftType.Value == TransactionType.Expense && transaction.Type == TransactionType.TransferOut)) &&
             transaction.Amount == draft.Amount &&
             transaction.OccurredOnUtc.ToUniversalTime().Date == draftDate &&
             NotesMatch(transaction.Note, draft.Note));

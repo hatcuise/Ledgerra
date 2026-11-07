@@ -19,7 +19,8 @@ public sealed record BackupArchiveResponse(
     IReadOnlyList<Reconciliation>? Reconciliations = null,
     IReadOnlyList<RecurringTransactionTemplate>? RecurringTemplates = null,
     IReadOnlyList<CategorizationRule>? CategorizationRules = null,
-    IReadOnlyList<UserExchangeRate>? ExchangeRates = null);
+    IReadOnlyList<UserExchangeRate>? ExchangeRates = null,
+    IReadOnlyList<TransferMatch>? TransferMatches = null);
 
 public sealed record BackupAccountResponse(
     Guid Id,

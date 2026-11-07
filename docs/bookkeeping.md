@@ -83,11 +83,11 @@ transfer destination. It is idempotent; it does not reinterpret or rewrite exist
 transactions. Retain your Synology project's PostgreSQL volume and credentials.
 Back up the database before upgrading. Update both backend and frontend images.
 
-JSON backups now use version 4 and include bank profiles, payees, entry metadata,
-reconciliation history, recurring schedules, categorization rules, and exchange
-rates alongside the existing data. Version 2/3 backups remain readable. Restore
+JSON backups now use version 5 and include bank profiles, payees, entry metadata,
+reconciliation history, recognized-transfer undo history, stable bank identities,
+recurring schedules, categorization rules, and exchange rates alongside the existing data. Version 2/3/4 backups remain readable. Restore
 replaces the signed-in user's data; review and retain a backup before restoring.
-A version 4 backup requires the upgraded backend; older versions cannot restore it.
+A version 5 backup requires the upgraded backend; older versions cannot restore it.
 
 ## Verification and scope
 
@@ -98,7 +98,65 @@ round trips. Browser tests in `frontend/e2e/bookkeeping*.spec.ts` exercise saved
 profiles, purchases/refunds, saving, reconciliation, payees, and payment matching.
 
 The capabilities above build on Ledgerra's existing budgets, splits, rules,
-recurring transactions, opening balances, and reports. Native HomeBank archives,
-QIF/OFX import, investment lot accounting, and foreign-currency transfer matching
-are outside this implementation. The new bookkeeping settings are currently in
+recurring transactions, opening balances, and reports. Full HomeBank wallet migration, split-allocation migration, investment lot accounting,
+and foreign-currency transfer matching remain outside this implementation. The new bookkeeping settings are currently in
 English; existing localized transaction labels remain supported.
+
+
+## Native statements: OFX/QFX, QIF, and HomeBank
+
+The Imports page has a separate native-file panel. Choose UTF-8/BOM Unicode or
+Windows-1252, and the QIF month/day or day/month order. Inspect the file, then map
+each source account to a distinct existing owned Ledgerra account, or explicitly
+skip that source account. OFX and HomeBank currency information must match the
+destination. The panel displays source opening balances but never changes the
+destination opening balance. Create missing Ledgerra accounts before importing.
+
+Preview transactions before saving. Payees, categories, references, and tags are
+carried through supported records. Unknown categories require review and are not
+created automatically. Positive credits in a uniquely matched expense category
+become Refund; other credits default to Income for review. Source clearing and
+reconciliation states are not asserted as Ledgerra-reconciled statements.
+
+OFX bank/credit-card XML and legacy SGML are supported. OFX FITID is hashed with
+its source bank/account identity into a stable bank key. Reimporting that identity
+is blocked even after descriptions are edited or data is backed up/restored.
+Other formats use reviewed heuristic duplicate detection, including entries that
+have since been linked as transfers. OFX corrections and investment statements
+need separate migration support; they are not applied as replacement/deletion commands.
+
+HomeBank .xhb input is XML, not the HomeBank installer/source .tar.gz archive.
+The reader resolves account/currency/payee/category data and GLib Julian dates.
+Only ordinary transaction migration is supported. Split rows, reminder/void rows,
+and cross-currency HomeBank transfers are excluded with warnings; schedules,
+budgets, rules, original reconciliation history, and opening balances are not
+migrated by this panel. Review warnings and destination balances before accepting
+any partial migration. Values requiring more than two decimal places are rejected
+for selected accounts, never silently rounded. DTDs/external entities are disabled.
+
+Limits: 8 MB input, 100 source accounts, and 20,000 supported transactions per file.
+QIF investment activity is rejected; QIF opening balance and split rows are not
+posted as ordinary entries. QIF two-digit years use 1970–2069. Multi-file batches
+and complete HomeBank wallet migration remain separate inventory items.
+
+## Automatic and retrospective transfer recognition
+
+New ordinary transactions and imported batches look for an existing counterpart.
+Pairs must have opposite directions, equal amounts, the same currency, different
+owned accounts, and dates within three calendar days. Both endpoints must be
+mutually unique. Automatic linking additionally requires a nontrivial shared bank
+reference, or transfer descriptions that identify both owned accounts by name or
+masked account suffix. Generic transfer wording or equal amounts/dates alone only
+produce suggestions. Reconciled, split, refund, and already-linked entries are excluded.
+
+Bookkeeping → Recognize transfers scans entries that were added earlier. Choose a
+0–7 day gap, review candidates, link a selected pair, or automatically link the
+clear matches. No extra money movements are created. Both account balances,
+original dates, payees, references, and tags remain intact; income/spending reports
+exclude the linked payment. Recognized history offers Undo match, restoring both
+original entries and their categories where those categories still exist. Reopen
+any reconciled statement before undoing; recognized entries cannot be edited or
+deleted through the old transfer editor before unlinking.
+
+The [HomeBank capability audit](audits/homebank-5.10.3-gap-analysis.md) lists the
+remaining work and distinguishes reference behavior from engineering recommendations.

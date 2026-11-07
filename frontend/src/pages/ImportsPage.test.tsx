@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -51,9 +52,9 @@ vi.mock("../hooks/useLedgerraData", () => ({
 
 function renderImportsPage() {
   return render(
-    <ImportAnalysisProvider>
+    <MemoryRouter><ImportAnalysisProvider>
       <ImportsPage />
-    </ImportAnalysisProvider>
+    </ImportAnalysisProvider></MemoryRouter>
   );
 }
 
@@ -219,7 +220,7 @@ describe("ImportsPage", () => {
       );
     }
 
-    render(<Harness />);
+    render(<MemoryRouter><Harness /></MemoryRouter>);
 
     fireEvent.change(screen.getByLabelText("Account"), { target: { value: "account-1" } });
     fireEvent.change(screen.getByLabelText("Report file"), {

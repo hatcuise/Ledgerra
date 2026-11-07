@@ -180,7 +180,7 @@ public sealed class MonthlyReportImportsController : ControllerBase
                     draft.Amount,
                     draft.Type,
                     draft.OccurredOnUtc,
-                    draft.Note, draft.PayeeName, draft.Reference, draft.Tags)).ToList(),
+                    draft.Note, draft.PayeeName, draft.Reference, draft.Tags, draft.ExternalKey?.ToUpperInvariant())).ToList(),
                 request.AcceptedDuplicateSourceIds),
             cancellationToken);
 

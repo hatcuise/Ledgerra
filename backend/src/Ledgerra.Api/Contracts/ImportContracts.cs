@@ -38,7 +38,8 @@ public sealed record MonthlyReportDraftTransactionResponse(
     bool IsSelectedByDefault,
     string? PayeeName = null,
     string? Reference = null,
-    string? Tags = null);
+    string? Tags = null,
+    string? ExternalKey = null);
 
 public sealed class CommitMonthlyReportDraftsRequest
 {
@@ -73,6 +74,7 @@ public sealed class CommitMonthlyReportDraftRequest : IValidatableObject
     [MaxLength(120)] public string? PayeeName { get; init; }
     [MaxLength(120)] public string? Reference { get; init; }
     [MaxLength(400)] public string? Tags { get; init; }
+    [RegularExpression("^[0-9A-Fa-f]{64}$")] public string? ExternalKey { get; init; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

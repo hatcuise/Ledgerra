@@ -182,6 +182,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<TransferRecognitionService>();
+builder.Services.AddScoped<NativeStatementReader>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))

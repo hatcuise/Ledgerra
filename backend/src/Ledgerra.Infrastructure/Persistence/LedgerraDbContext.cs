@@ -49,6 +49,7 @@ public sealed class LedgerraDbContext : DbContext
 
     public DbSet<UserExchangeRate> ExchangeRates => Set<UserExchangeRate>();
 
+    public DbSet<TransferMatch> TransferMatches => Set<TransferMatch>();
     public DbSet<ImportProfile> ImportProfiles => Set<ImportProfile>();
     public DbSet<Payee> Payees => Set<Payee>();
     public DbSet<EntryMetadata> EntryMetadata => Set<EntryMetadata>();
@@ -56,9 +57,10 @@ public sealed class LedgerraDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<TransferMatch>(b => b.HasKey(x => x.Id));
         modelBuilder.Entity<ImportProfile>(b => { b.HasKey(x => x.Id); b.Property(x => x.Name).HasMaxLength(120); b.Property(x => x.SettingsJson).HasMaxLength(8000); b.HasIndex(x => new { x.UserId, x.Name }).IsUnique(); });
         modelBuilder.Entity<Payee>(b => { b.HasKey(x => x.Id); b.Property(x => x.Name).HasMaxLength(120); b.HasIndex(x => new { x.UserId, x.Name }).IsUnique(); });
-        modelBuilder.Entity<EntryMetadata>(b => { b.HasKey(x => x.Id); b.Property(x => x.Reference).HasMaxLength(120); b.Property(x => x.Tags).HasMaxLength(400); b.Property(x => x.Status).HasMaxLength(20); b.HasOne<Transaction>().WithMany().HasForeignKey(x => x.Id).OnDelete(DeleteBehavior.Cascade); });
+        modelBuilder.Entity<EntryMetadata>(b => { b.HasKey(x => x.Id); b.Property(x => x.ExternalKey).HasMaxLength(64); b.HasIndex(x => new { x.UserId, x.ExternalKey }).IsUnique().HasFilter("\"ExternalKey\" IS NOT NULL"); b.Property(x => x.Reference).HasMaxLength(120); b.Property(x => x.Tags).HasMaxLength(400); b.Property(x => x.Status).HasMaxLength(20); b.HasOne<Transaction>().WithMany().HasForeignKey(x => x.Id).OnDelete(DeleteBehavior.Cascade); });
         modelBuilder.Entity<Reconciliation>(b => { b.HasKey(x => x.Id); b.Property(x => x.StatementBalance).HasPrecision(18, 2); b.HasIndex(x => new { x.UserId, x.AccountId, x.StatementDate }).IsUnique(); });
         modelBuilder.Entity<AppUser>(builder =>
         {

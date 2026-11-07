@@ -591,6 +591,10 @@ export const apiClient = {
     });
   },
 
+  nativeImport<T>(token: string, step: "inspect" | "preview", body: FormData) {
+    return request<T>(`/api/imports/native/${step}`, { token, method: "POST", body });
+  },
+
   getImportProfiles(token: string) { return request<CsvProfile[]>("/api/bookkeeping/profiles", { token }); },
   saveImportProfile(token: string, payload: unknown) { return request<CsvProfile>("/api/bookkeeping/profiles", { token, method: "POST", body: payload }); },
   bookkeeping<T>(token: string, path: string, method = "GET", payload?: unknown) {

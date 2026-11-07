@@ -7501,3 +7501,5 @@ label {
 .bookkeeping-page th, .bookkeeping-page td { text-align: left; padding: .75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
 .bookkeeping-page td input:not([type=checkbox]), .bookkeeping-page td select { min-width: 120px; max-width: 190px; }
 .bookkeeping-page input[type=checkbox], .csv-import-settings input[type=checkbox] { width: auto; }
+
+.transfer-candidate { border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-block: .75rem; }
