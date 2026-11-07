@@ -201,3 +201,11 @@ metadata entry, clone/add-and-keep, payee/tag operations, category hierarchy and
 merge, named transaction filters and previewed retrospective/compound rules.
 Phase 3 is not yet complete: reusable templates, void/reminder states, shared
 report filters and richer management/rollups remain explicitly listed there.
+
+## Bank connectivity extension — v0.16.0
+
+A [US/Canada Plaid connector](../bank-connections.md) adds hosted bank linking,
+manual transaction synchronization and review before posting. This is a Ledgerra
+extension requested after the audit, not a claim about HomeBank 5.10.3 features.
+Provider credentials, Production approval and real-bank consent are supplied by
+the installation owner. Test validation uses simulated provider responses.

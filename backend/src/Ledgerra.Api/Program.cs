@@ -1,3 +1,4 @@
+using Ledgerra.Api.Services.Banking;
 using System.Text;
 using Ledgerra.Application.Budgets;
 using Ledgerra.Application.Accounts;
@@ -30,6 +31,7 @@ if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
     dataProtectionBuilder.PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath));
 }
 builder.Services.AddScoped<ISecretProtector, DataProtectionSecretProtector>();
+builder.Services.AddScoped<BankSecretProtector>();
 builder.Services.AddScoped<CsvReportContentExtractor>();
 builder.Services.AddScoped<PdfReportContentExtractor>();
 builder.Services.AddScoped<IReportContentExtractor, ReportContentExtractor>();
@@ -184,6 +186,9 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<TransferRecognitionService>();
 builder.Services.AddScoped<NativeStatementReader>();
+builder.Services.AddScoped<BankSyncService>();
+builder.Services.AddHttpClient<IPlaidClient, PlaidClient>(http => http.Timeout = TimeSpan.FromSeconds(30))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
 var app = builder.Build();
 
@@ -208,6 +213,7 @@ using (var scope = app.Services.CreateScope())
     await AccountSchemaInitializer.InitializeAsync(dbContext);
     await BudgetSchemaInitializer.InitializeAsync(dbContext);
     await BookkeepingSchemaInitializer.InitializeAsync(dbContext);
+    await BankSchemaInitializer.InitializeAsync(dbContext);
 }
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));

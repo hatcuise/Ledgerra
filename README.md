@@ -439,3 +439,10 @@ cd frontend
 npm test
 npm run build
 ```
+
+### Bank connections
+
+US and Canadian deposit/card accounts can connect through Plaid under Imports.
+Bring your own Plaid application credentials; Sandbox uses test banks, while real
+banks require Production access. Downloaded entries are reviewed before posting.
+See [browser setup and Synology requirements](docs/bank-connections.md).

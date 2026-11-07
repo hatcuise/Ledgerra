@@ -197,3 +197,11 @@ splits and transfers are excluded. Narrow the dates if more than 2,000 eligible
 entries would be reviewed.
 
 See [v0.15.0 scope and remaining work](release-notes/v0.15.0.md).
+
+## Bank connections (v0.16.0)
+
+**Imports → Connect US and Canadian banks** can download bank/card transactions
+through Plaid and feed them into the same review and duplicate checks as file
+imports. Nothing posts automatically. See [bank connection setup](bank-connections.md)
+for Sandbox versus Production, OAuth redirects, NAS keyring persistence and backup
+limits. No OpenAI key is needed for bank connections.

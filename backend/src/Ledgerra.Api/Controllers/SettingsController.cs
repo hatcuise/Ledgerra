@@ -161,6 +161,10 @@ public sealed class SettingsController : ControllerBase
         _dbContext.EntryMetadata.RemoveRange(_dbContext.EntryMetadata.Where(x => x.UserId == userId));
         _dbContext.Reconciliations.RemoveRange(_dbContext.Reconciliations.Where(x => x.UserId == userId));
         _dbContext.Payees.RemoveRange(_dbContext.Payees.Where(x => x.UserId == userId));
+        _dbContext.BankFeedEntries.RemoveRange(_dbContext.BankFeedEntries.Where(x => x.UserId == userId));
+        _dbContext.ConnectedBankAccounts.RemoveRange(_dbContext.ConnectedBankAccounts.Where(x => x.UserId == userId));
+        _dbContext.BankConnections.RemoveRange(_dbContext.BankConnections.Where(x => x.UserId == userId));
+        _dbContext.BankProviderSettings.RemoveRange(_dbContext.BankProviderSettings.Where(x => x.UserId == userId));
         _dbContext.SavedLedgerViews.RemoveRange(_dbContext.SavedLedgerViews.Where(x => x.UserId == userId));
         _dbContext.ImportProfiles.RemoveRange(_dbContext.ImportProfiles.Where(x => x.UserId == userId));
         _dbContext.Transactions.RemoveRange(_dbContext.Transactions.Where(transaction => transaction.UserId == userId));

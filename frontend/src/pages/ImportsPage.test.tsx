@@ -21,6 +21,7 @@ vi.mock("../state/AuthContext", () => ({
 
 vi.mock("../api/client", () => ({
   apiClient: {
+    banks: vi.fn((_token: string, path: string) => Promise.resolve(path === "settings" ? { isConfigured: false, clientId: "", environment: "Sandbox", country: "US", redirectUri: null } : [])),
     analyzeMonthlyReport: mocks.analyzeMonthlyReport,
     retryMonthlyReportAnalysisParse: mocks.retryMonthlyReportAnalysisParse,
     downloadMonthlyReportAnalysisRawOutput: mocks.downloadMonthlyReportAnalysisRawOutput,

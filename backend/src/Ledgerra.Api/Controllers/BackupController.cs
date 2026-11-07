@@ -84,6 +84,8 @@ public sealed class BackupController : ControllerBase
         }
 
         await using var tx = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        // Provider tokens are intentionally excluded from portable archives. Re-map after restore.
+        foreach (var mapping in await _dbContext.ConnectedBankAccounts.Where(x => x.UserId == userId).ToListAsync(cancellationToken)) mapping.LedgerAccountId = null;
         var budgetPeriodIds = _dbContext.BudgetPeriods.Where(x => x.UserId == userId).Select(x => x.Id);
         _dbContext.BudgetCategoryLimits.RemoveRange(_dbContext.BudgetCategoryLimits.Where(x => budgetPeriodIds.Contains(x.BudgetPeriodId)));
         _dbContext.BudgetPeriods.RemoveRange(_dbContext.BudgetPeriods.Where(x => x.UserId == userId));

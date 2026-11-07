@@ -101,6 +101,7 @@ public sealed class AccountStore : IAccountStore
             return AccountDeleteStatus.HasTransactions;
         }
 
+        foreach (var mapping in await _dbContext.ConnectedBankAccounts.Where(x => x.UserId == userId && x.LedgerAccountId == accountId).ToListAsync(cancellationToken)) mapping.LedgerAccountId = null;
         _dbContext.Accounts.Remove(account);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return AccountDeleteStatus.Deleted;

@@ -1,3 +1,4 @@
+import { BankConnectionsPanel } from "../components/BankConnectionsPanel";
 import { NativeImportPanel } from "../components/NativeImportPanel";
 import { CsvImportSettings } from "../components/CsvImportSettings";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
@@ -449,6 +450,7 @@ export function ImportsPage() {
         description={t("imports.description")}
       />
 
+      <BankConnectionsPanel accounts={accounts} />
       <NativeImportPanel accounts={accounts} />
       <SectionCard title={t("imports.analyzeReport")}>
         <form className="stack-form" onSubmit={handleAnalyze}>
