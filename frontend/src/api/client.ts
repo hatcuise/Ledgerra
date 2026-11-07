@@ -1,3 +1,4 @@
+import type { CsvOptions, CsvProfile } from "../types/csv";
 import type {
   Account,
   AiSettings,
@@ -590,13 +591,22 @@ export const apiClient = {
     });
   },
 
-  previewCsvBankImport(token: string, payload: { accountId: string; file: File; dateColumn: string; amountColumn: string; descriptionColumn?: string; invertAmounts?: boolean }) {
+  getImportProfiles(token: string) { return request<CsvProfile[]>("/api/bookkeeping/profiles", { token }); },
+  saveImportProfile(token: string, payload: unknown) { return request<CsvProfile>("/api/bookkeeping/profiles", { token, method: "POST", body: payload }); },
+  bookkeeping<T>(token: string, path: string, method = "GET", payload?: unknown) {
+    return request<T>(`/api/bookkeeping/${path}`, { token, method, ...(payload === undefined ? {} : { body: payload }) });
+  },
+
+  previewCsvBankImport(token: string, payload: { accountId: string; file: File; dateColumn: string; amountColumn: string; descriptionColumn?: string; invertAmounts?: boolean } & Partial<CsvOptions>) {
     const body = new FormData();
     body.append("accountId", payload.accountId);
     body.append("file", payload.file);
     body.append("dateColumn", payload.dateColumn);
     body.append("amountColumn", payload.amountColumn);
     body.append("invertAmounts", String(payload.invertAmounts ?? false));
+    for (const key of ["delimiter", "cultureName", "dateFormat", "debitColumn", "creditColumn", "typeColumn", "payeeColumn", "categoryColumn", "referenceColumn", "tagsColumn", "positiveType", "negativeType"] as const) {
+      if (payload[key]) body.append(key, payload[key]!);
+    }
     if (payload.descriptionColumn) {
       body.append("descriptionColumn", payload.descriptionColumn);
     }

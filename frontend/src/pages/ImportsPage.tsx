@@ -1,3 +1,4 @@
+import { CsvImportSettings } from "../components/CsvImportSettings";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { apiClient } from "../api/client";
 import { useLedgerraData } from "../hooks/useLedgerraData";
@@ -33,9 +34,22 @@ function readFileText(file: File) {
   });
 }
 
-function extractCsvHeaders(text: string) {
-  const headerRow = text.split(/\r?\n/).find((line) => line.trim().length > 0) ?? "";
-  return headerRow.split(",").map((value) => value.trim().replace(/^"|"$/g, "")).filter(Boolean);
+function extractCsvHeaders(text: string, delimiter = ",") {
+  const headers: string[] = [];
+  let cell = "";
+  let quoted = false;
+  const content = text.replace(/^\uFEFF/, "").replace(/^(?:[ \t]*\r?\n)+/, "");
+  for (let index = 0; index < content.length; index++) {
+    const current = content[index];
+    if (current === '"') {
+      if (quoted && content[index + 1] === '"') { cell += '"'; index++; }
+      else quoted = !quoted;
+    } else if (!quoted && current === delimiter) { headers.push(cell.trim()); cell = ""; }
+    else if (!quoted && (current === "\r" || current === "\n")) break;
+    else cell += current;
+  }
+  headers.push(cell.trim());
+  return headers.filter(Boolean);
 }
 
 function formatDraftDate(value: string) {
@@ -109,6 +123,7 @@ export function ImportsPage() {
     setProvider,
     file,
     setFile,
+    csvOptions,
     csvHeaders,
     setCsvHeaders,
     dateColumn,
@@ -155,6 +170,20 @@ export function ImportsPage() {
     setProvider(aiSettings?.defaultProvider ?? "OpenAi");
   }, [aiSettings?.defaultProvider]);
 
+  useEffect(() => {
+    if (file?.name.toLowerCase().endsWith(".csv")) {
+      let active = true;
+      void readFileText(file).then(text => {
+        if (!active) return;
+        const headers = extractCsvHeaders(text, csvOptions.delimiter);
+        setCsvHeaders(headers);
+        setDateColumn(current => headers.includes(current) ? current : headers.find(h => /date/i.test(h)) ?? headers[0] ?? "");
+        setAmountColumn(current => headers.includes(current) ? current : headers.find(h => /amount/i.test(h)) ?? headers[1] ?? "");
+      }).catch(e => { if (active) setError(getErrorMessage(e, "Unable to read CSV file.")); });
+      return () => { active = false; };
+    }
+  }, [file, csvOptions.delimiter]);
+
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const nextFile = event.target.files?.[0] ?? null;
     setFile(nextFile);
@@ -167,7 +196,7 @@ export function ImportsPage() {
 
     if (nextFile && nextFile.name.toLowerCase().endsWith(".csv")) {
       const text = await readFileText(nextFile);
-      const headers = extractCsvHeaders(text);
+      const headers = extractCsvHeaders(text, csvOptions.delimiter);
       setCsvHeaders(headers);
       setDateColumn(headers.find((header) => /date/i.test(header)) ?? headers[0] ?? "");
       setAmountColumn(headers.find((header) => /amount|debit|credit/i.test(header)) ?? headers[1] ?? "");
@@ -192,7 +221,7 @@ export function ImportsPage() {
       let selectedDescriptionColumn = descriptionColumn;
 
       if (isCsv && (!selectedDateColumn || !selectedAmountColumn)) {
-        const headers = csvHeaders.length > 0 ? csvHeaders : extractCsvHeaders(await readFileText(file));
+        const headers = csvHeaders.length > 0 ? csvHeaders : extractCsvHeaders(await readFileText(file), csvOptions.delimiter);
         selectedDateColumn = selectedDateColumn || headers.find((header) => /date/i.test(header)) || headers[0] || "";
         selectedAmountColumn = selectedAmountColumn || headers.find((header) => /amount|debit|credit/i.test(header)) || headers[1] || "";
         selectedDescriptionColumn = selectedDescriptionColumn || headers.find((header) => /description|memo|note/i.test(header)) || "";
@@ -214,6 +243,7 @@ export function ImportsPage() {
             dateColumn: selectedDateColumn,
             amountColumn: selectedAmountColumn,
             invertAmounts,
+            ...csvOptions,
             descriptionColumn: selectedDescriptionColumn
           })
         : await apiClient.analyzeMonthlyReport(auth.accessToken, { accountId, month, provider, file }, setAnalysisJob);
@@ -448,6 +478,7 @@ export function ImportsPage() {
             <input accept=".pdf,.csv,application/pdf,text/csv" onChange={handleFileChange} type="file" required disabled={isAnalyzing} />
           </label>
 
+          {csvHeaders.length > 0 ? <CsvImportSettings /> : null}
           {csvHeaders.length > 0 ? (
             <>
               <label>
@@ -618,6 +649,7 @@ export function ImportsPage() {
                   <select aria-label={`Type for ${draft.sourceId}`} value={draft.type} onChange={(event) => updateDraft(draft.sourceId, { type: event.target.value })}>
                     <option value="Expense">{t("transactionType.Expense")}</option>
                     <option value="Income">{t("transactionType.Income")}</option>
+                    <option value="Refund">{t("transactionType.Refund")}</option>
                   </select>
                 </label>
                 <label className="import-field import-field-category">
@@ -648,6 +680,11 @@ export function ImportsPage() {
                   <span>{t("imports.draftNote")}</span>
                   <input aria-label={`Description for ${draft.sourceId}`} value={draft.note ?? ""} onChange={(event) => updateDraft(draft.sourceId, { note: event.target.value })} />
                 </label>
+                {(draft.payeeName || draft.reference || draft.tags) && <div className="import-review-flags">
+                  <label>Payee<input aria-label={`Payee for ${draft.sourceId}`} maxLength={120} value={draft.payeeName ?? ""} onChange={e => updateDraft(draft.sourceId, { payeeName: e.target.value })} /></label>
+                  <label>Reference<input aria-label={`Reference for ${draft.sourceId}`} maxLength={120} value={draft.reference ?? ""} onChange={e => updateDraft(draft.sourceId, { reference: e.target.value })} /></label>
+                  <label>Tags<input aria-label={`Tags for ${draft.sourceId}`} maxLength={400} value={draft.tags ?? ""} onChange={e => updateDraft(draft.sourceId, { tags: e.target.value })} /></label>
+                </div>}
                 <strong className="import-confidence">{Math.round(draft.confidence * 100)}%</strong>
                 <div className="import-review-flags">
                   {draft.appliedRuleName ? <span className="status-badge success">{draft.appliedRuleName}</span> : null}

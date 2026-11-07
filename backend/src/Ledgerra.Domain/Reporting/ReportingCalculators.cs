@@ -48,7 +48,7 @@ public static class TransactionAggregationCalculator
         var expensesByMonth = transactions
             .Where(IsRootExpense)
             .GroupBy(item => new DateOnly(item.OccurredOnUtc.Year, item.OccurredOnUtc.Month, 1))
-            .ToDictionary(group => group.Key, group => group.Sum(item => item.Amount));
+            .ToDictionary(group => group.Key, group => group.Sum(TransactionSemantics.SpendingAmount));
 
         return buckets
             .Select(bucket => new MonthlySpendingPoint(bucket.Label, expensesByMonth.GetValueOrDefault(bucket.MonthStart)))
@@ -60,14 +60,14 @@ public static class TransactionAggregationCalculator
         IEnumerable<Transaction> transactions)
     {
         var cashFlowByMonth = transactions
-            .Where(item => !item.ParentTransactionId.HasValue && item.Type is TransactionType.Income or TransactionType.Expense)
+            .Where(item => !item.ParentTransactionId.HasValue && item.Type is TransactionType.Income or TransactionType.Expense or TransactionType.Refund)
             .GroupBy(item => new DateOnly(item.OccurredOnUtc.Year, item.OccurredOnUtc.Month, 1))
             .ToDictionary(
                 group => group.Key,
                 group => new
                 {
                     Income = group.Where(item => item.Type == TransactionType.Income).Sum(item => item.Amount),
-                    Expenses = group.Where(item => item.Type == TransactionType.Expense).Sum(item => item.Amount)
+                    Expenses = group.Where(TransactionSemantics.IsSpending).Sum(TransactionSemantics.SpendingAmount)
                 });
 
         return buckets
@@ -83,7 +83,7 @@ public static class TransactionAggregationCalculator
 
     private static bool IsRootExpense(Transaction transaction)
     {
-        return transaction.Type == TransactionType.Expense && !transaction.ParentTransactionId.HasValue;
+        return TransactionSemantics.IsSpending(transaction) && !transaction.ParentTransactionId.HasValue;
     }
 }
 
@@ -100,7 +100,7 @@ public static class CategoryBreakdownCalculator
             {
                 CategoryId = group.Key,
                 CategoryName = categoryNames.GetValueOrDefault(group.Key, "Uncategorized"),
-                Amount = group.Sum(item => item.Amount)
+                Amount = group.Sum(TransactionSemantics.SpendingAmount)
             })
             .OrderByDescending(item => item.Amount)
             .ToList();
@@ -118,7 +118,7 @@ public static class CategoryBreakdownCalculator
 
     private static bool IsCategoryExpense(Transaction transaction)
     {
-        return transaction.Type == TransactionType.Expense &&
+        return TransactionSemantics.IsSpending(transaction) &&
             transaction.CategoryId.HasValue &&
             (transaction.ParentTransactionId.HasValue || !transaction.SplitGroupId.HasValue);
     }

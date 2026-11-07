@@ -375,7 +375,7 @@ public sealed class BackupRestoreSecurityTests : IClassFixture<LedgerraApiFactor
         var exportResponse = await client.GetAsync("/api/backup/export");
         Assert.Equal(HttpStatusCode.OK, exportResponse.StatusCode);
         var archive = await exportResponse.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal(3, archive.GetProperty("version").GetInt32());
+        Assert.Equal(4, archive.GetProperty("version").GetInt32());
         Assert.Equal("Credit Union", archive.GetProperty("accounts")[0].GetProperty("institutionName").GetString());
         Assert.Equal("Cash", archive.GetProperty("accounts")[0].GetProperty("iconKind").GetString());
         Assert.Equal(goalId, archive.GetProperty("transactions")[0].GetProperty("savingsGoalId").GetGuid());

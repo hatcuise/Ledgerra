@@ -28,16 +28,17 @@ public sealed class RecurringTransactionUseCases
     public async Task<IReadOnlyList<RecurringTransactionTemplate>> GetAllAsync(Guid userId, CancellationToken ct)
         => await _repository.GetAllAsync(userId, ct);
 
-    public async Task<RecurringTransactionTemplate> CreateAsync(Guid userId, Guid accountId, Guid? categoryId, decimal amount, string type, string interval, DateTime startOnUtc, string? note, CancellationToken ct)
+    public async Task<RecurringTransactionTemplate> CreateAsync(Guid userId, Guid accountId, Guid? categoryId, decimal amount, string type, string interval, DateTime startOnUtc, string? note, CancellationToken ct, Guid? destinationAccountId = null)
     {
-        var (txType, parsedInterval, normalizedStart) = await ValidateTemplateFieldsAsync(userId, accountId, categoryId, amount, type, interval, startOnUtc, ct);
+        var (txType, parsedInterval, normalizedStart) = await ValidateTemplateFieldsAsync(userId, accountId, categoryId, amount, type, interval, startOnUtc, ct, destinationAccountId);
 
         var item = new RecurringTransactionTemplate
         {
             Id = Guid.NewGuid(),
             UserId = userId,
             AccountId = accountId,
-            CategoryId = categoryId,
+            CategoryId = txType == TransactionType.TransferOut ? null : categoryId,
+            DestinationAccountId = txType == TransactionType.TransferOut ? destinationAccountId : null,
             Amount = amount,
             Type = txType,
             Interval = parsedInterval,
@@ -47,14 +48,15 @@ public sealed class RecurringTransactionUseCases
         return await _repository.CreateAsync(item, ct);
     }
 
-    public async Task<RecurringTransactionTemplate> UpdateAsync(Guid userId, Guid templateId, Guid accountId, Guid? categoryId, decimal amount, string type, string interval, DateTime startOnUtc, bool isActive, string? note, CancellationToken ct)
+    public async Task<RecurringTransactionTemplate> UpdateAsync(Guid userId, Guid templateId, Guid accountId, Guid? categoryId, decimal amount, string type, string interval, DateTime startOnUtc, bool isActive, string? note, CancellationToken ct, Guid? destinationAccountId = null)
     {
         var template = await GetRequiredTemplateAsync(userId, templateId, ct);
-        var (txType, parsedInterval, normalizedStart) = await ValidateTemplateFieldsAsync(userId, accountId, categoryId, amount, type, interval, startOnUtc, ct);
+        var (txType, parsedInterval, normalizedStart) = await ValidateTemplateFieldsAsync(userId, accountId, categoryId, amount, type, interval, startOnUtc, ct, destinationAccountId);
 
         var scheduleChanged = template.StartOnUtc != normalizedStart || template.Interval != parsedInterval;
         template.AccountId = accountId;
-        template.CategoryId = categoryId;
+        template.CategoryId = txType == TransactionType.TransferOut ? null : categoryId;
+        template.DestinationAccountId = txType == TransactionType.TransferOut ? destinationAccountId : null;
         template.Amount = amount;
         template.Type = txType;
         template.Interval = parsedInterval;
@@ -121,7 +123,10 @@ public sealed class RecurringTransactionUseCases
                 }
                 while (next <= nowUtc && catchUpCount < MaxCatchUpPerTemplate)
                 {
-                    await _repository.AddTransactionAsync(new Transaction { Id = Guid.NewGuid(), UserId = userId, AccountId = template.AccountId, CategoryId = template.CategoryId, Amount = template.Amount, Type = template.Type, OccurredOnUtc = next, Note = template.Note }, ct);
+                    var group = template.DestinationAccountId.HasValue ? Guid.NewGuid() : (Guid?)null;
+                    await _repository.AddTransactionAsync(new Transaction { Id = Guid.NewGuid(), UserId = userId, AccountId = template.AccountId, CategoryId = template.CategoryId, Amount = template.Amount, Type = template.Type, OccurredOnUtc = next, Note = template.Note, TransferGroupId = group }, ct);
+                    if (template.DestinationAccountId is Guid destination)
+                        await _repository.AddTransactionAsync(new Transaction { Id = Guid.NewGuid(), UserId = userId, AccountId = destination, Amount = template.Amount, Type = TransactionType.TransferIn, OccurredOnUtc = next, Note = template.Note, TransferGroupId = group }, ct);
                     template.LastGeneratedOnUtc = next;
                     generated++;
                     catchUpCount++;
@@ -141,7 +146,7 @@ public sealed class RecurringTransactionUseCases
         return template ?? throw new KeyNotFoundException("Recurring template not found");
     }
 
-    private async Task<(TransactionType Type, RecurringInterval Interval, DateTime StartOnUtc)> ValidateTemplateFieldsAsync(Guid userId, Guid accountId, Guid? categoryId, decimal amount, string type, string interval, DateTime startOnUtc, CancellationToken ct)
+    private async Task<(TransactionType Type, RecurringInterval Interval, DateTime StartOnUtc)> ValidateTemplateFieldsAsync(Guid userId, Guid accountId, Guid? categoryId, decimal amount, string type, string interval, DateTime startOnUtc, CancellationToken ct, Guid? destinationAccountId = null)
     {
         var normalizedStart = startOnUtc.Kind == DateTimeKind.Utc
             ? startOnUtc
@@ -150,7 +155,10 @@ public sealed class RecurringTransactionUseCases
                 : startOnUtc.ToUniversalTime();
 
         if (amount <= 0) throw new InvalidOperationException("Amount must be greater than zero");
-        if (!Enum.TryParse<TransactionType>(type, true, out var txType) || (txType != TransactionType.Expense && txType != TransactionType.Income)) throw new InvalidOperationException("Type must be Income or Expense");
+        var isTransfer = type.Equals("Transfer", StringComparison.OrdinalIgnoreCase);
+        var txType = TransactionType.TransferOut;
+        if (!isTransfer && (!Enum.TryParse<TransactionType>(type, true, out txType) || txType is not (TransactionType.Expense or TransactionType.Income or TransactionType.Refund))) throw new InvalidOperationException("Type must be Income, Expense, Refund, or Transfer");
+        if (isTransfer && (!destinationAccountId.HasValue || destinationAccountId == accountId || !await _repository.AccountExistsAsync(userId, destinationAccountId.Value, ct))) throw new InvalidOperationException("Choose a different destination account owned by this user.");
         if (!Enum.TryParse<RecurringInterval>(interval, true, out var parsedInterval)) throw new InvalidOperationException("Interval must be Weekly or Monthly");
 
         if (!await _repository.AccountExistsAsync(userId, accountId, ct))

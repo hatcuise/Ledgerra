@@ -23,6 +23,7 @@ vi.mock("../api/client", () => ({
     analyzeMonthlyReport: mocks.analyzeMonthlyReport,
     retryMonthlyReportAnalysisParse: mocks.retryMonthlyReportAnalysisParse,
     downloadMonthlyReportAnalysisRawOutput: mocks.downloadMonthlyReportAnalysisRawOutput,
+    getImportProfiles: vi.fn().mockResolvedValue([]),
     previewCsvBankImport: mocks.analyzeMonthlyReport,
     commitMonthlyReportDrafts: mocks.commitMonthlyReportDrafts,
     createImportRule: mocks.createImportRule

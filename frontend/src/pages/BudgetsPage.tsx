@@ -210,13 +210,13 @@ function buildBudgetRows(
   languageCode: string
 ): BudgetEnvelope[] {
   const budgetByCategory = new Map(budgetCategories.map((category) => [category.categoryId, category]));
-  const monthlyExpenseTransactions = transactions.filter((transaction) => transaction.type === "Expense" && transaction.occurredOnUtc.slice(0, 7) === selectedMonth);
+  const monthlyExpenseTransactions = transactions.filter((transaction) => (transaction.type === "Expense" || transaction.type === "Refund") && transaction.occurredOnUtc.slice(0, 7) === selectedMonth);
 
   return expenseCategories.map((category, index) => {
     const budgetCategory = budgetByCategory.get(category.id);
     const fallbackPlanned = budgetCategory?.planned ?? 0;
     const planned = Math.max(parseDraftAmount(draft.get(category.id), fallbackPlanned), 0);
-    const spent = Math.max(budgetCategory?.spent ?? 0, 0);
+    const spent = budgetCategory?.spent ?? 0;
     const operationCount = monthlyExpenseTransactions.filter((transaction) => transaction.categoryId === category.id).length;
     const carryOverUnspent = carryOverDraft.get(category.id) ?? budgetCategory?.carryOverUnspent ?? false;
     const carryForward = carryOverUnspent ? budgetCategory?.carryForward ?? 0 : 0;
@@ -297,7 +297,7 @@ function BudgetRhythmChart({
   const padding = { top: 14, right: 18, bottom: 32, left: 46 };
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
-  const monthlyExpenseTransactions = transactions.filter((transaction) => transaction.type === "Expense" && transaction.occurredOnUtc.slice(0, 7) === selectedMonth);
+  const monthlyExpenseTransactions = transactions.filter((transaction) => (transaction.type === "Expense" || transaction.type === "Refund") && transaction.occurredOnUtc.slice(0, 7) === selectedMonth);
   const maxValue = Math.max(totalPlanned, totalSpent, projectedEnd, 1000) * 1.12;
   const elapsedDay = Math.max(timing.elapsedDays, 1);
   const xForDay = (day: number) => padding.left + ((day - 1) / Math.max(timing.daysInMonth - 1, 1)) * plotWidth;
@@ -307,7 +307,7 @@ function BudgetRhythmChart({
   monthlyExpenseTransactions.forEach((transaction) => {
     const transactionDay = new Date(transaction.occurredOnUtc).getDate();
     if (transactionDay >= 1 && transactionDay <= timing.daysInMonth) {
-      dailyAmounts[transactionDay - 1] += Math.abs(transaction.amount);
+      if (!transaction.parentTransactionId) dailyAmounts[transactionDay - 1] += (transaction.type === "Refund" ? -1 : 1) * Math.abs(transaction.amount);
     }
   });
 

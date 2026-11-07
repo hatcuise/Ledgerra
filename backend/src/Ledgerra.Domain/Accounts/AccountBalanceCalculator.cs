@@ -9,20 +9,5 @@ public static class AccountBalanceCalculator
         return account.OpeningBalance + transactions.Sum(GetSignedAmount);
     }
 
-    private static decimal GetSignedAmount(Transaction transaction)
-    {
-        if (transaction.ParentTransactionId.HasValue)
-        {
-            return 0m;
-        }
-
-        return transaction.Type switch
-        {
-            TransactionType.Income => transaction.Amount,
-            TransactionType.TransferIn => transaction.Amount,
-            TransactionType.Expense => -transaction.Amount,
-            TransactionType.TransferOut => -transaction.Amount,
-            _ => 0m
-        };
-    }
+    private static decimal GetSignedAmount(Transaction transaction) => TransactionSemantics.BalanceAmount(transaction);
 }

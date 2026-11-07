@@ -46,7 +46,11 @@ public sealed class ImportCategorizationRuleMatcher : IImportCategorizationRuleM
         return draft with
         {
             CategoryId = rule.AssignCategoryId,
-            Type = rule.AssignTransactionType.ToString(),
+            // A merchant's expense-category rule also categorizes its refunds;
+            // changing a refund to an expense must use an explicit type rule.
+            Type = draft.Type.Equals("Refund", StringComparison.OrdinalIgnoreCase)
+                && rule.AssignTransactionType == TransactionType.Expense && rule.MatchField != ImportRuleMatchField.Type
+                ? "Refund" : rule.AssignTransactionType.ToString(),
             AppliedRuleId = rule.Id,
             AppliedRuleName = rule.Name
         };

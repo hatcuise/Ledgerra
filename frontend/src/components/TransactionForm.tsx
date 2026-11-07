@@ -3,7 +3,7 @@ import { apiClient } from "../api/client";
 import { useI18n } from "../state/I18nContext";
 import type { Account, Category, SavingsGoal, Transaction } from "../types";
 
-const transactionTypes = ["Expense", "Income", "Transfer"] as const;
+const transactionTypes = ["Expense", "Income", "Refund", "Transfer"] as const;
 const createNewCategoryValue = "__create_new__";
 const defaultCategoryColor = "#5f8f7b";
 
@@ -39,6 +39,8 @@ function getTransactionTypeLabel(type: (typeof transactionTypes)[number], t: Ret
   switch (type) {
     case "Expense":
       return t("transactionType.Expense");
+    case "Refund":
+      return t("transactionType.Refund");
     case "Income":
       return t("transactionType.Income");
     case "Transfer":
@@ -152,7 +154,7 @@ export function TransactionForm({
       if (isCreatingCategory) {
         const createdCategory = await apiClient.createCategory(token, {
           name: newCategoryName.trim(),
-          kind: values.type,
+          kind: values.type === "Refund" ? "Expense" : values.type,
           color: newCategoryColor
         });
         nextCategoryId = createdCategory.id;

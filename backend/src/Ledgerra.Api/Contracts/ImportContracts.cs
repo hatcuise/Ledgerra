@@ -35,7 +35,10 @@ public sealed record MonthlyReportDraftTransactionResponse(
     bool IsLikelyDuplicate,
     Guid? DuplicateTransactionId,
     string? DuplicateReason,
-    bool IsSelectedByDefault);
+    bool IsSelectedByDefault,
+    string? PayeeName = null,
+    string? Reference = null,
+    string? Tags = null);
 
 public sealed class CommitMonthlyReportDraftsRequest
 {
@@ -66,6 +69,10 @@ public sealed class CommitMonthlyReportDraftRequest : IValidatableObject
 
     [MaxLength(400)]
     public string? Note { get; init; }
+
+    [MaxLength(120)] public string? PayeeName { get; init; }
+    [MaxLength(120)] public string? Reference { get; init; }
+    [MaxLength(400)] public string? Tags { get; init; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -101,6 +108,18 @@ public sealed class CsvImportPreviewRequest
     [Required, MaxLength(120)]
     public string AmountColumn { get; init; } = string.Empty;
 
+    public string Delimiter { get; init; } = ",";
+    public string CultureName { get; init; } = "en-US";
+    public string? DateFormat { get; init; }
+    public string? DebitColumn { get; init; }
+    public string? CreditColumn { get; init; }
+    public string? TypeColumn { get; init; }
+    public string? PayeeColumn { get; init; }
+    public string? CategoryColumn { get; init; }
+    public string? ReferenceColumn { get; init; }
+    public string? TagsColumn { get; init; }
+    public string PositiveType { get; init; } = "Income";
+    public string NegativeType { get; init; } = "Expense";
     public bool InvertAmounts { get; init; }
 
     [MaxLength(120)]

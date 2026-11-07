@@ -35,7 +35,7 @@ public sealed class BackupController : ControllerBase
         var savingsGoals = await _dbContext.SavingsGoals.Where(x => x.UserId == userId).OrderBy(x => x.CreatedAtUtc).ToListAsync(cancellationToken);
 
         return Ok(new BackupArchiveResponse(
-            3,
+            4,
             DateTimeOffset.UtcNow.ToString("O"),
             accounts.Select(x => new BackupAccountResponse(x.Id, x.Name, x.Type.ToString(), x.CurrencyCode, x.OpeningBalance, x.IsActive, x.InstitutionName, x.AccountNumberMasked, x.IconKind.ToString(), x.ExcludeFromBudget, x.ExcludeFromNetWorth)).ToList(),
             categories.Select(x => new BackupCategoryResponse(x.Id, x.Name, x.Kind.ToString(), x.Color)).ToList(),
@@ -45,7 +45,15 @@ public sealed class BackupController : ControllerBase
                 x.Year,
                 x.Month,
                 x.CategoryLimits.Select(limit => new BackupBudgetCategoryLimitResponse(limit.Id, limit.CategoryId, limit.PlannedAmount, limit.CarryOverUnspent)).ToList())).ToList(),
-            savingsGoals.Select(x => new BackupSavingsGoalResponse(x.Id, x.Name, x.TargetAmount, x.DeadlineUtc?.ToString("O"), x.CreatedAtUtc.ToString("O"), x.UpdatedAtUtc.ToString("O"))).ToList()));
+            savingsGoals.Select(x => new BackupSavingsGoalResponse(x.Id, x.Name, x.TargetAmount, x.DeadlineUtc?.ToString("O"), x.CreatedAtUtc.ToString("O"), x.UpdatedAtUtc.ToString("O"))).ToList(),
+            await _dbContext.ImportProfiles.Where(x => x.UserId == userId).ToListAsync(cancellationToken),
+            await _dbContext.Payees.Where(x => x.UserId == userId).ToListAsync(cancellationToken),
+            await _dbContext.EntryMetadata.Where(x => x.UserId == userId).ToListAsync(cancellationToken),
+            await _dbContext.Reconciliations.Where(x => x.UserId == userId).ToListAsync(cancellationToken),
+            await _dbContext.RecurringTransactionTemplates.Where(x => x.UserId == userId).ToListAsync(cancellationToken),
+            await _dbContext.CategorizationRules.AsNoTracking().Where(x => x.UserId == userId).ToListAsync(cancellationToken),
+            await _dbContext.ExchangeRates.Where(x => x.UserId == userId).ToListAsync(cancellationToken)));
+
     }
 
     [HttpPost("restore")]
@@ -53,7 +61,7 @@ public sealed class BackupController : ControllerBase
     {
         var userId = User.GetRequiredUserId();
 
-        if (archive.Version is < 2 or > 3)
+        if (archive.Version is < 2 or > 4)
         {
             return BadRequest(new ProblemDetails { Title = "Unsupported backup archive version." });
         }
@@ -63,6 +71,9 @@ public sealed class BackupController : ControllerBase
         {
             return BadRequest(new ProblemDetails { Title = referenceError });
         }
+
+        var bookkeepingError = ValidateBookkeeping(archive);
+        if (bookkeepingError is not null) return BadRequest(new ProblemDetails { Title = bookkeepingError });
 
         var shapeError = ValidateArchiveShape(archive);
         if (shapeError is not null)
@@ -74,6 +85,13 @@ public sealed class BackupController : ControllerBase
         var budgetPeriodIds = _dbContext.BudgetPeriods.Where(x => x.UserId == userId).Select(x => x.Id);
         _dbContext.BudgetCategoryLimits.RemoveRange(_dbContext.BudgetCategoryLimits.Where(x => budgetPeriodIds.Contains(x.BudgetPeriodId)));
         _dbContext.BudgetPeriods.RemoveRange(_dbContext.BudgetPeriods.Where(x => x.UserId == userId));
+        _dbContext.EntryMetadata.RemoveRange(_dbContext.EntryMetadata.Where(x => x.UserId == userId));
+        _dbContext.Reconciliations.RemoveRange(_dbContext.Reconciliations.Where(x => x.UserId == userId));
+        _dbContext.Payees.RemoveRange(_dbContext.Payees.Where(x => x.UserId == userId));
+        _dbContext.ImportProfiles.RemoveRange(_dbContext.ImportProfiles.Where(x => x.UserId == userId));
+        _dbContext.RecurringTransactionTemplates.RemoveRange(_dbContext.RecurringTransactionTemplates.Where(x => x.UserId == userId));
+        _dbContext.CategorizationRules.RemoveRange(_dbContext.CategorizationRules.Where(x => x.UserId == userId));
+        _dbContext.ExchangeRates.RemoveRange(_dbContext.ExchangeRates.Where(x => x.UserId == userId));
         _dbContext.Transactions.RemoveRange(_dbContext.Transactions.Where(x => x.UserId == userId));
         _dbContext.Categories.RemoveRange(_dbContext.Categories.Where(x => x.UserId == userId));
         _dbContext.Accounts.RemoveRange(_dbContext.Accounts.Where(x => x.UserId == userId));
@@ -152,6 +170,14 @@ public sealed class BackupController : ControllerBase
         await _dbContext.BudgetPeriods.AddRangeAsync(periods, cancellationToken);
         await _dbContext.BudgetCategoryLimits.AddRangeAsync(limits, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        foreach (var x in archive.ImportProfiles ?? []) { x.UserId = userId; _dbContext.ImportProfiles.Add(x); }
+        foreach (var x in archive.Payees ?? []) { x.UserId = userId; _dbContext.Payees.Add(x); }
+        foreach (var x in archive.EntryMetadata ?? []) { x.UserId = userId; _dbContext.EntryMetadata.Add(x); }
+        foreach (var x in archive.Reconciliations ?? []) { x.UserId = userId; _dbContext.Reconciliations.Add(x); }
+        foreach (var x in archive.RecurringTemplates ?? []) { x.UserId = userId; _dbContext.RecurringTransactionTemplates.Add(x); }
+        foreach (var x in archive.CategorizationRules ?? []) { x.User = null; x.AssignCategory = null; x.UserId = userId; _dbContext.CategorizationRules.Add(x); }
+        foreach (var x in archive.ExchangeRates ?? []) { x.UserId = userId; _dbContext.ExchangeRates.Add(x); }
+        await _dbContext.SaveChangesAsync(cancellationToken);
         await tx.CommitAsync(cancellationToken);
 
         return NoContent();
@@ -198,6 +224,49 @@ public sealed class BackupController : ControllerBase
             }
         }
 
+        return null;
+    }
+
+    private static string? ValidateBookkeeping(BackupArchiveResponse a)
+    {
+        var accounts = a.Accounts.Select(x => x.Id).ToHashSet(); var categories = a.Categories.Select(x => x.Id).ToHashSet();
+        var entries = a.Transactions.Select(x => x.Id).ToHashSet(); var payees = (a.Payees ?? []).Select(x => x.Id).ToHashSet();
+        if ((a.Reconciliations ?? []).GroupBy(x => x.Id).Any(x => x.Count() > 1)
+            || (a.EntryMetadata ?? []).GroupBy(x => x.Id).Any(x => x.Count() > 1)
+            || (a.ImportProfiles ?? []).GroupBy(x => x.Name).Any(x => x.Count() > 1)
+            || (a.Payees ?? []).GroupBy(x => x.Name).Any(x => x.Count() > 1)) return "Duplicate bookkeeping records in backup.";
+        var statements = (a.Reconciliations ?? []).ToDictionary(x => x.Id);
+        if ((a.Payees ?? []).Any(x => string.IsNullOrWhiteSpace(x.Name) || x.Name.Length > 120 || (x.DefaultCategoryId.HasValue && !categories.Contains(x.DefaultCategoryId.Value)))) return "Invalid payee in backup.";
+        foreach (var x in a.EntryMetadata ?? [])
+        {
+            if (!entries.Contains(x.Id) || (x.PayeeId.HasValue && !payees.Contains(x.PayeeId.Value)) || x.Status is not ("Uncleared" or "Cleared" or "Reconciled") || x.Reference.Length > 120 || x.Tags.Length > 400) return "Invalid entry metadata in backup.";
+            if (x.Status == "Reconciled")
+            {
+                if (!x.ReconciliationId.HasValue || !statements.TryGetValue(x.ReconciliationId.Value, out var statement) || a.Transactions.Single(t => t.Id == x.Id).AccountId != statement.AccountId) return "Invalid statement reference in backup.";
+            }
+            else if (x.ReconciliationId.HasValue) return "Invalid statement status in backup.";
+        }
+        if ((a.Reconciliations ?? []).Any(x => !accounts.Contains(x.AccountId) || x.StatementDate == default)) return "Invalid reconciliation in backup.";
+        if ((a.RecurringTemplates ?? []).Any(x => !accounts.Contains(x.AccountId) || (x.DestinationAccountId.HasValue && (!accounts.Contains(x.DestinationAccountId.Value) || x.DestinationAccountId == x.AccountId)) || (x.CategoryId.HasValue && !categories.Contains(x.CategoryId.Value)) || x.Amount <= 0)) return "Invalid recurring template in backup.";
+        if ((a.CategorizationRules ?? []).Any(x => !categories.Contains(x.AssignCategoryId))) return "Invalid categorization rule in backup.";
+        foreach (var schedule in a.RecurringTemplates ?? [])
+        {
+            if (!Enum.IsDefined(schedule.Type) || !Enum.IsDefined(schedule.Interval) || schedule.Type == Ledgerra.Domain.Transactions.TransactionType.TransferIn
+                || (schedule.Type == Ledgerra.Domain.Transactions.TransactionType.TransferOut) != schedule.DestinationAccountId.HasValue)
+                return "Invalid recurring transaction type in backup.";
+        }
+        foreach (var profile in a.ImportProfiles ?? [])
+        {
+            try
+            {
+                var settings = System.Text.Json.JsonSerializer.Deserialize<ProfileSettings>(profile.SettingsJson, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+                if (settings is null || settings.Options is null || string.IsNullOrWhiteSpace(settings.DateColumn)) return "Invalid bank profile in backup.";
+                settings.Options.Validate();
+            }
+            catch (Exception e) when (e is System.Text.Json.JsonException or InvalidOperationException or ArgumentException) { return "Invalid bank profile in backup."; }
+        }
+        if ((a.ExchangeRates ?? []).Any(x => x.Rate <= 0 || x.FromCurrencyCode.Length != 3 || x.ToCurrencyCode.Length != 3)) return "Invalid exchange rate in backup.";
+        if ((a.ImportProfiles ?? []).Any(x => string.IsNullOrWhiteSpace(x.Name) || x.Name.Length > 120 || x.SettingsJson.Length > 8000)) return "Invalid import profile in backup.";
         return null;
     }
 

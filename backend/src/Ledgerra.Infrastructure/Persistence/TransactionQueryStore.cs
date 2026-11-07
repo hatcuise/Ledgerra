@@ -71,7 +71,7 @@ public sealed class TransactionQueryStore : ITransactionQueryStore
 
         if (uncategorizedOnly)
         {
-            query = query.Where(item => item.Type == TransactionType.Expense && item.CategoryId == null);
+            query = query.Where(item => (item.Type == TransactionType.Expense || item.Type == TransactionType.Refund) && item.CategoryId == null);
         }
 
         return await query

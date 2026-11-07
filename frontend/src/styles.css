@@ -7486,3 +7486,18 @@ label {
     grid-template-columns: 1fr;
   }
 }
+
+/* Bookkeeping register and saved bank import settings. */
+.bookkeeping-page .form-grid,
+.csv-import-settings .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  align-items: end;
+  gap: 1rem;
+}
+.csv-import-settings { min-width: 0; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+.bookkeeping-page .table-scroll { max-width: 100%; overflow-x: auto; margin-block: 1rem; }
+.bookkeeping-page table { width: 100%; min-width: 900px; border-collapse: collapse; }
+.bookkeeping-page th, .bookkeeping-page td { text-align: left; padding: .75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.bookkeeping-page td input:not([type=checkbox]), .bookkeeping-page td select { min-width: 120px; max-width: 190px; }
+.bookkeeping-page input[type=checkbox], .csv-import-settings input[type=checkbox] { width: auto; }

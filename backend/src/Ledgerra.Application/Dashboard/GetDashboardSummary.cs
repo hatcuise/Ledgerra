@@ -109,13 +109,13 @@ public sealed class GetDashboardSummaryQueryHandler
             .Select(group => new DashboardCategorySpendResult(
                 group.Key,
                 categoryNames.GetValueOrDefault(group.Key, "Uncategorized"),
-                group.Sum(item => item.Amount)))
+                group.Sum(TransactionSemantics.SpendingAmount)))
             .OrderByDescending(item => item.Amount)
             .Take(5)
             .ToList();
 
         var income = transactions.Where(item => item.Type == TransactionType.Income && !item.ParentTransactionId.HasValue).Sum(item => item.Amount);
-        var expenses = transactions.Where(item => item.Type == TransactionType.Expense && !item.ParentTransactionId.HasValue).Sum(item => item.Amount);
+        var expenses = transactions.Where(item => TransactionSemantics.IsSpending(item) && !item.ParentTransactionId.HasValue).Sum(TransactionSemantics.SpendingAmount);
 
         return new DashboardSummaryResult(
             income,
@@ -205,7 +205,7 @@ public sealed class GetDashboardSummaryQueryHandler
 
     private static bool IsCategoryExpense(Transaction transaction)
     {
-        return transaction.Type == TransactionType.Expense &&
+        return TransactionSemantics.IsSpending(transaction) &&
             transaction.CategoryId.HasValue &&
             (transaction.ParentTransactionId.HasValue || !transaction.SplitGroupId.HasValue);
     }

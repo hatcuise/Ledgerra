@@ -1,4 +1,6 @@
 using Ledgerra.Api.Contracts;
+using Ledgerra.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Ledgerra.Api.Extensions;
 using Ledgerra.Application.Transactions;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +28,13 @@ public sealed class RecurringTransactionsController : ControllerBase
     {
         try
         {
-            var item = await _useCases.CreateAsync(User.GetRequiredUserId(), request.AccountId, request.CategoryId, request.Amount, request.Type, request.Interval, request.StartOnUtc, request.Note, cancellationToken);
+            if (request.Type.Equals("Transfer", StringComparison.OrdinalIgnoreCase) && request.DestinationAccountId is Guid destination)
+            {
+                var db = HttpContext.RequestServices.GetRequiredService<LedgerraDbContext>();
+                var accounts = await db.Accounts.Where(x => x.UserId == User.GetRequiredUserId() && (x.Id == request.AccountId || x.Id == destination)).ToListAsync(cancellationToken);
+                if (accounts.Count != 2 || accounts.Select(x => x.CurrencyCode).Distinct().Count() != 1) return BadRequest(new { error = "Scheduled transfers need different accounts with the same currency." });
+            }
+            var item = await _useCases.CreateAsync(User.GetRequiredUserId(), request.AccountId, request.CategoryId, request.Amount, request.Type, request.Interval, request.StartOnUtc, request.Note, cancellationToken, request.DestinationAccountId);
             return Ok(Map(item));
         }
         catch (InvalidOperationException ex)
@@ -40,7 +48,13 @@ public sealed class RecurringTransactionsController : ControllerBase
     {
         try
         {
-            var item = await _useCases.UpdateAsync(User.GetRequiredUserId(), templateId, request.AccountId, request.CategoryId, request.Amount, request.Type, request.Interval, request.StartOnUtc, request.IsActive, request.Note, cancellationToken);
+            if (request.Type.Equals("Transfer", StringComparison.OrdinalIgnoreCase) && request.DestinationAccountId is Guid destination)
+            {
+                var db = HttpContext.RequestServices.GetRequiredService<LedgerraDbContext>();
+                var accounts = await db.Accounts.Where(x => x.UserId == User.GetRequiredUserId() && (x.Id == request.AccountId || x.Id == destination)).ToListAsync(cancellationToken);
+                if (accounts.Count != 2 || accounts.Select(x => x.CurrencyCode).Distinct().Count() != 1) return BadRequest(new { error = "Scheduled transfers need different accounts with the same currency." });
+            }
+            var item = await _useCases.UpdateAsync(User.GetRequiredUserId(), templateId, request.AccountId, request.CategoryId, request.Amount, request.Type, request.Interval, request.StartOnUtc, request.IsActive, request.Note, cancellationToken, request.DestinationAccountId);
             return Ok(Map(item));
         }
         catch (KeyNotFoundException ex)
@@ -97,5 +111,5 @@ public sealed class RecurringTransactionsController : ControllerBase
     }
 
     private static RecurringTransactionTemplateResponse Map(Ledgerra.Domain.Transactions.RecurringTransactionTemplate item)
-        => new(item.Id, item.AccountId, item.CategoryId, item.Amount, item.Type.ToString(), item.Interval.ToString(), item.StartOnUtc, item.LastGeneratedOnUtc, item.IsActive, item.Note);
+        => new(item.Id, item.AccountId, item.CategoryId, item.Amount, item.DestinationAccountId.HasValue ? "Transfer" : item.Type.ToString(), item.Interval.ToString(), item.StartOnUtc, item.LastGeneratedOnUtc, item.IsActive, item.Note, item.DestinationAccountId);
 }

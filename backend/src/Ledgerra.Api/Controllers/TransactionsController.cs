@@ -8,6 +8,7 @@ namespace Ledgerra.Api.Controllers;
 
 [ApiController]
 [Authorize]
+[ReconciliationGuard]
 [Route("api/transactions")]
 public sealed class TransactionsController : ControllerBase
 {

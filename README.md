@@ -62,6 +62,11 @@ Ledgerra is a self-hosted personal finance tracker built with an ASP.NET Core AP
 - `site/` — static GitHub Pages project website
 - `docker-compose.yml` — full self-hosted stack
 
+## Bookkeeping
+
+Saved bank CSV profiles, explicit refunds, payees, statement reconciliation, and
+credit card payment matching are described in [the bookkeeping guide](docs/bookkeeping.md).
+
 ## Local Development
 
 Run the whole development stack from the repository root:

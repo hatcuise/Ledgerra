@@ -27,6 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/transactions", label: t("nav.transactions"), icon: TransactionsIcon },
     { to: "/recurring", label: t("nav.recurring"), icon: CalendarIcon },
     { to: "/imports", label: t("nav.imports"), icon: ImportsIcon },
+    { to: "/bookkeeping", label: "Bookkeeping", icon: AccountsIcon },
     { to: "/accounts", label: t("nav.accounts"), icon: AccountsIcon },
     { to: "/budgets", label: t("nav.budgets"), icon: BudgetsIcon },
     { to: "/goals", label: t("nav.goals"), icon: GoalsIcon },

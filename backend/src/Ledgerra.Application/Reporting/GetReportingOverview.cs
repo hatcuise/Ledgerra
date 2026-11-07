@@ -107,7 +107,7 @@ public sealed class GetReportingOverviewQueryHandler
             cancellationToken);
 
         var categoryIds = transactions
-            .Where(item => item.Type == TransactionType.Expense && item.CategoryId.HasValue)
+            .Where(item => TransactionSemantics.IsSpending(item) && item.CategoryId.HasValue)
             .Select(item => item.CategoryId!.Value)
             .Distinct()
             .ToArray();

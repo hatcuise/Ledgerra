@@ -18,6 +18,12 @@ public sealed class TransactionCommandStore : ITransactionCommandStore
         return _dbContext.Accounts.AnyAsync(item => item.UserId == userId && item.Id == accountId, cancellationToken);
     }
 
+    public async Task<bool> AccountsShareCurrencyAsync(Guid userId, Guid sourceAccountId, Guid destinationAccountId, CancellationToken cancellationToken)
+    {
+        var currencies = await _dbContext.Accounts.Where(x => x.UserId == userId && (x.Id == sourceAccountId || x.Id == destinationAccountId)).Select(x => x.CurrencyCode).ToListAsync(cancellationToken);
+        return currencies.Count == 2 && currencies.Distinct(StringComparer.OrdinalIgnoreCase).Count() == 1;
+    }
+
     public Task<bool> CategoryExistsAsync(Guid userId, Guid categoryId, CancellationToken cancellationToken)
     {
         return _dbContext.Categories.AnyAsync(item => item.UserId == userId && item.Id == categoryId, cancellationToken);

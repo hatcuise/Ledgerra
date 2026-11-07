@@ -72,8 +72,9 @@ export function computeNetWorth(accounts: Account[]): NetWorth {
 export type BalancePoint = { date: string; balance: number };
 
 export function signedAmount(t: Transaction): number {
+  if (t.parentTransactionId) return 0;
   if (t.type === "Expense" || t.type === "TransferOut") return -Math.abs(t.amount);
-  if (t.type === "Income" || t.type === "TransferIn") return Math.abs(t.amount);
+  if (t.type === "Income" || t.type === "Refund" || t.type === "TransferIn") return Math.abs(t.amount);
   return t.amount;
 }
 
@@ -98,13 +99,13 @@ function monthKey(value: string): string {
 
 export function computeMonthInflows(transactions: Transaction[], month: string): number {
   return transactions
-    .filter((t) => monthKey(t.occurredOnUtc) === month && (t.type === "Income" || t.type === "TransferIn"))
+    .filter((t) => !t.parentTransactionId && monthKey(t.occurredOnUtc) === month && (t.type === "Income" || t.type === "Refund" || t.type === "TransferIn"))
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 }
 
 export function computeMonthOutflows(transactions: Transaction[], month: string): number {
   return transactions
-    .filter((t) => monthKey(t.occurredOnUtc) === month && (t.type === "Expense" || t.type === "TransferOut"))
+    .filter((t) => !t.parentTransactionId && monthKey(t.occurredOnUtc) === month && (t.type === "Expense" || t.type === "TransferOut"))
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 }
 

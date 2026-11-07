@@ -1,8 +1,11 @@
+import { defaultCsvOptions, type CsvOptions } from "../types/csv";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { MonthlyReportAnalysis, MonthlyReportAnalysisJob, MonthlyReportDraftTransaction } from "../types";
 
 type ImportAnalysisContextValue = {
+  csvOptions: CsvOptions;
+  setCsvOptions: Dispatch<SetStateAction<CsvOptions>>;
   accountId: string;
   setAccountId: Dispatch<SetStateAction<string>>;
   month: string;
@@ -76,6 +79,7 @@ function formatDraftDate(value: string) {
 }
 
 export function ImportAnalysisProvider({ children }: { children: ReactNode }) {
+  const [csvOptions, setCsvOptions] = useState<CsvOptions>(defaultCsvOptions);
   const [accountId, setAccountId] = useState("");
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [provider, setProvider] = useState("OpenAi");
@@ -152,6 +156,8 @@ export function ImportAnalysisProvider({ children }: { children: ReactNode }) {
   return (
     <ImportAnalysisContext.Provider
       value={{
+        csvOptions,
+        setCsvOptions,
         accountId,
         setAccountId,
         month,

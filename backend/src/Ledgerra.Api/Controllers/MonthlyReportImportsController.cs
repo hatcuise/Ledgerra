@@ -1,4 +1,6 @@
 using System.Text;
+using Ledgerra.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Ledgerra.Api.Contracts;
 using Ledgerra.Api.Extensions;
 using Ledgerra.Application.Imports;
@@ -19,17 +21,26 @@ public sealed class MonthlyReportImportsController : ControllerBase
     private readonly CommitMonthlyReportDraftsCommandHandler _commitMonthlyReportDraftsCommandHandler;
     private readonly IReportContentExtractor _reportContentExtractor;
     private readonly CsvBankImportMapper _csvBankImportMapper;
+    private readonly LedgerraDbContext _db;
+    private readonly IImportCategorizationRuleMatcher _ruleMatcher;
+    private readonly IImportDuplicateDetector _duplicateDetector;
 
     public MonthlyReportImportsController(
         MonthlyReportAnalysisJobStore analysisJobStore,
         CommitMonthlyReportDraftsCommandHandler commitMonthlyReportDraftsCommandHandler,
         IReportContentExtractor reportContentExtractor,
-        CsvBankImportMapper csvBankImportMapper)
+        CsvBankImportMapper csvBankImportMapper,
+        LedgerraDbContext db,
+        IImportCategorizationRuleMatcher ruleMatcher,
+        IImportDuplicateDetector duplicateDetector)
     {
         _analysisJobStore = analysisJobStore;
         _commitMonthlyReportDraftsCommandHandler = commitMonthlyReportDraftsCommandHandler;
         _reportContentExtractor = reportContentExtractor;
         _csvBankImportMapper = csvBankImportMapper;
+        _db = db;
+        _ruleMatcher = ruleMatcher;
+        _duplicateDetector = duplicateDetector;
     }
 
     [HttpPost("analyze")]
@@ -97,6 +108,7 @@ public sealed class MonthlyReportImportsController : ControllerBase
     {
         try
         {
+            if (!await _db.Accounts.AnyAsync(x => x.UserId == User.GetRequiredUserId() && x.Id == request.AccountId, cancellationToken)) return NotFound();
             if (request.File.Length == 0 || request.File.Length > 8 * 1024 * 1024)
             {
                 throw new InvalidOperationException("CSV file must contain data and be 8 MB or smaller.");
@@ -123,8 +135,29 @@ public sealed class MonthlyReportImportsController : ControllerBase
                 request.DateColumn,
                 request.AmountColumn,
                 request.DescriptionColumn,
-                request.InvertAmounts);
-            return Ok(new MonthlyReportAnalysisResponse(drafts.Select(MapDraft).ToList(), []));
+                request.InvertAmounts,
+                new CsvImportOptions { Delimiter = request.Delimiter, CultureName = request.CultureName, DateFormat = request.DateFormat,
+                    DebitColumn = request.DebitColumn, CreditColumn = request.CreditColumn, TypeColumn = request.TypeColumn,
+                    PositiveType = request.PositiveType, NegativeType = request.NegativeType,
+                    PayeeColumn = request.PayeeColumn, CategoryColumn = request.CategoryColumn, ReferenceColumn = request.ReferenceColumn, TagsColumn = request.TagsColumn });
+            var categories = await _db.Categories.Where(x => x.UserId == User.GetRequiredUserId()).ToListAsync(cancellationToken);
+            drafts = drafts.Select(d => {
+                if (d.CategoryName is null) return d;
+                var kind = d.Type == "Income" ? Ledgerra.Domain.Categories.CategoryKind.Income : Ledgerra.Domain.Categories.CategoryKind.Expense;
+                var matches = categories.Where(c => c.Kind == kind && c.Name.Equals(d.CategoryName, StringComparison.OrdinalIgnoreCase)).ToList();
+                return matches.Count == 1 ? d with { CategoryId = matches[0].Id } : d with { IsSelectedByDefault = false, Warnings = d.Warnings.Append($"Category '{d.CategoryName}' was not matched. Choose a category before saving.").ToList() };
+            }).ToList();
+            var rawBySource = drafts.ToDictionary(d => d.SourceId);
+            var userId = User.GetRequiredUserId();
+            var review = drafts.Select(d => new ImportDraftReviewItem(d.SourceId, d.AccountId, d.CategoryId, d.Amount, d.Type,
+                d.OccurredOnUtc, d.Note, d.Confidence, d.Warnings, d.AppliedRuleId, d.AppliedRuleName,
+                d.IsLikelyDuplicate, d.DuplicateTransactionId, d.DuplicateReason, d.IsSelectedByDefault)).ToList();
+            var reviewed = await _duplicateDetector.MarkDuplicatesAsync(userId, await _ruleMatcher.ApplyAsync(userId, review, cancellationToken), cancellationToken);
+            return Ok(new MonthlyReportAnalysisResponse(reviewed.Select(d => new MonthlyReportDraftTransactionResponse(
+                d.SourceId, d.AccountId, d.CategoryId, d.Amount, d.Type, d.OccurredOnUtc, d.Note, d.Confidence,
+                d.Warnings, d.AppliedRuleId, d.AppliedRuleName, d.IsLikelyDuplicate, d.DuplicateTransactionId,
+                d.DuplicateReason, d.IsSelectedByDefault,
+                rawBySource[d.SourceId].PayeeName, rawBySource[d.SourceId].Reference, rawBySource[d.SourceId].Tags)).ToList(), []));
         }
         catch (InvalidOperationException exception)
         {
@@ -147,7 +180,7 @@ public sealed class MonthlyReportImportsController : ControllerBase
                     draft.Amount,
                     draft.Type,
                     draft.OccurredOnUtc,
-                    draft.Note)).ToList(),
+                    draft.Note, draft.PayeeName, draft.Reference, draft.Tags)).ToList(),
                 request.AcceptedDuplicateSourceIds),
             cancellationToken);
 

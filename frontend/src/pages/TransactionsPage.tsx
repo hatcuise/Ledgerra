@@ -10,7 +10,7 @@ import { ActionMenu } from "../ui/ActionMenu";
 import { PageHeader } from "../ui/PageHeader";
 import { formatCurrency, formatDate } from "../utils/format";
 
-const transactionTypes = ["Expense", "Income", "Transfer"];
+const transactionTypes = ["Expense", "Income", "Refund", "Transfer"];
 
 function escapeCsvValue(value: string | number | boolean | null | undefined) {
   const normalized = value == null ? "" : String(value);
@@ -27,6 +27,8 @@ function getTransactionTypeLabel(type: string, t: ReturnType<typeof useI18n>["t"
   switch (type) {
     case "Expense":
       return t("transactionType.Expense");
+    case "Refund":
+      return t("transactionType.Refund");
     case "Income":
       return t("transactionType.Income");
     case "Transfer":
@@ -45,7 +47,7 @@ function isTransferTransaction(transaction: Transaction) {
 }
 
 function getCategorisableTransactionKind(transaction: Transaction) {
-  return transaction.type === "Expense" || transaction.type === "Income" ? transaction.type : "";
+  return transaction.type === "Refund" ? "Expense" : transaction.type === "Expense" || transaction.type === "Income" ? transaction.type : "";
 }
 
 function getCategoryFallbackColor(kind: string) {
@@ -57,7 +59,7 @@ function getTransactionSignedAmount(transaction: Transaction) {
     return -Math.abs(transaction.amount);
   }
 
-  if (transaction.type === "Income" || transaction.type === "TransferIn") {
+  if (transaction.type === "Income" || transaction.type === "Refund" || transaction.type === "TransferIn") {
     return Math.abs(transaction.amount);
   }
 
@@ -243,7 +245,7 @@ export function TransactionsPage() {
         return false;
       }
 
-      if (showUncategorizedOnly && (transaction.type !== "Expense" || transaction.categoryId)) {
+      if (showUncategorizedOnly && ((transaction.type !== "Expense" && transaction.type !== "Refund") || transaction.categoryId)) {
         return false;
       }
 
@@ -293,16 +295,16 @@ export function TransactionsPage() {
     [selectedTransactions]
   );
   const uncategorizedExpenseCount = useMemo(
-    () => ledgerTransactions.filter((transaction) => transaction.type === "Expense" && !transaction.categoryId).length,
+    () => ledgerTransactions.filter((transaction) => (transaction.type === "Expense" || transaction.type === "Refund") && !transaction.categoryId).length,
     [ledgerTransactions]
   );
   const transactionSummary = useMemo(() => {
     const income = visibleTransactions
-      .filter((transaction) => transaction.type === "Income")
+      .filter((transaction) => transaction.type === "Income" && !transaction.parentTransactionId)
       .reduce((total, transaction) => total + Math.abs(transaction.amount), 0);
     const expenses = visibleTransactions
-      .filter((transaction) => transaction.type === "Expense")
-      .reduce((total, transaction) => total + Math.abs(transaction.amount), 0);
+      .filter((transaction) => (transaction.type === "Expense" || transaction.type === "Refund") && !transaction.parentTransactionId)
+      .reduce((total, transaction) => total + (transaction.type === "Refund" ? -1 : 1) * Math.abs(transaction.amount), 0);
 
     const uniqueDays = new Set(visibleTransactions.map((transaction) => getDateKey(transaction.occurredOnUtc)));
     const dayCount = Math.max(uniqueDays.size, 1);
@@ -829,7 +831,7 @@ export function TransactionsPage() {
                                 <span>{getTransactionTypeLabel(toFormType(transaction.type), t)}</span>
                               </div>
                               <div className="transaction-row-actions">
-                                {!transaction.categoryId && transaction.type === "Expense" ? (
+                                {!transaction.categoryId && (transaction.type === "Expense" || transaction.type === "Refund") ? (
                                   <label className="quick-category-control">
                                     {t("transactions.assignCategoryTo", { label })}
                                     <select

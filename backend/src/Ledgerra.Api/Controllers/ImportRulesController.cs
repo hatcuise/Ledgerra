@@ -171,9 +171,9 @@ public sealed class ImportRulesController : ControllerBase
         }
 
         if (!EnumParsingExtensions.TryParseTransactionType(request.AssignTransactionType, out var transactionType) ||
-            (transactionType != TransactionType.Income && transactionType != TransactionType.Expense))
+            (transactionType != TransactionType.Income && transactionType != TransactionType.Expense && transactionType != TransactionType.Refund))
         {
-            return this.ValidationError(new Dictionary<string, string[]> { ["assignTransactionType"] = ["Supported assigned transaction types are Income and Expense."] });
+            return this.ValidationError(new Dictionary<string, string[]> { ["assignTransactionType"] = ["Supported assigned transaction types are Income, Expense, and Refund."] });
         }
 
         var trimmedName = request.Name.Trim();
@@ -198,7 +198,7 @@ public sealed class ImportRulesController : ControllerBase
         }
 
         if ((transactionType == TransactionType.Income && category.Kind != CategoryKind.Income) ||
-            (transactionType == TransactionType.Expense && category.Kind != CategoryKind.Expense))
+            ((transactionType == TransactionType.Expense || transactionType == TransactionType.Refund) && category.Kind != CategoryKind.Expense))
         {
             return this.ValidationError(new Dictionary<string, string[]> { ["assignCategoryId"] = ["Assigned category kind must match the assigned transaction type."] });
         }

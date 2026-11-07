@@ -1,3 +1,8 @@
+using Ledgerra.Domain.Bookkeeping;
+using Ledgerra.Domain.Transactions;
+using Ledgerra.Domain.Imports;
+using Ledgerra.Domain.ExchangeRates;
+
 namespace Ledgerra.Api.Contracts;
 
 public sealed record BackupArchiveResponse(
@@ -7,7 +12,14 @@ public sealed record BackupArchiveResponse(
     IReadOnlyList<BackupCategoryResponse> Categories,
     IReadOnlyList<BackupTransactionResponse> Transactions,
     IReadOnlyList<BackupBudgetPeriodResponse> BudgetPeriods,
-    IReadOnlyList<BackupSavingsGoalResponse>? SavingsGoals = null);
+    IReadOnlyList<BackupSavingsGoalResponse>? SavingsGoals = null,
+    IReadOnlyList<ImportProfile>? ImportProfiles = null,
+    IReadOnlyList<Payee>? Payees = null,
+    IReadOnlyList<EntryMetadata>? EntryMetadata = null,
+    IReadOnlyList<Reconciliation>? Reconciliations = null,
+    IReadOnlyList<RecurringTransactionTemplate>? RecurringTemplates = null,
+    IReadOnlyList<CategorizationRule>? CategorizationRules = null,
+    IReadOnlyList<UserExchangeRate>? ExchangeRates = null);
 
 public sealed record BackupAccountResponse(
     Guid Id,

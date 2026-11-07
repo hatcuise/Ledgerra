@@ -1,4 +1,5 @@
 using Ledgerra.Application.Imports;
+using Ledgerra.Domain.Bookkeeping;
 using Ledgerra.Domain.Transactions;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,10 +30,11 @@ public sealed class MonthlyReportImportCommitStore : IMonthlyReportImportCommitS
         CancellationToken cancellationToken)
     {
         var transactions = new List<Transaction>(drafts.Count);
+        var payees = (await _dbContext.Payees.Where(x => x.UserId == userId).ToListAsync(cancellationToken)).GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToDictionary(x => x.Key, x => x.First(), StringComparer.OrdinalIgnoreCase);
         foreach (var draft in drafts)
         {
             Enum.TryParse<TransactionType>(draft.Type, true, out var parsedType);
-            transactions.Add(new Transaction
+            var transaction = new Transaction
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
@@ -42,7 +44,20 @@ public sealed class MonthlyReportImportCommitStore : IMonthlyReportImportCommitS
                 Type = parsedType,
                 Note = draft.Note,
                 OccurredOnUtc = draft.OccurredOnUtc.ToUniversalTime()
-            });
+            };
+            transactions.Add(transaction);
+            Payee? payee = null;
+            if (!string.IsNullOrWhiteSpace(draft.PayeeName))
+            {
+                var name = draft.PayeeName.Trim();
+                if (!payees.TryGetValue(name, out payee))
+                {
+                    payee = new Payee { Id = Guid.NewGuid(), UserId = userId, Name = name };
+                    payees.Add(name, payee); _dbContext.Payees.Add(payee);
+                }
+            }
+            if (payee is not null || !string.IsNullOrEmpty(draft.Reference) || !string.IsNullOrEmpty(draft.Tags))
+                _dbContext.EntryMetadata.Add(new EntryMetadata { Id = transaction.Id, UserId = userId, PayeeId = payee?.Id, Reference = draft.Reference ?? "", Tags = draft.Tags ?? "" });
         }
 
         _dbContext.Transactions.AddRange(transactions);

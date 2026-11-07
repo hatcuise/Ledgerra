@@ -64,6 +64,8 @@ export type Category = {
 };
 
 export type Transaction = {
+  parentTransactionId?: string | null;
+  splitGroupId?: string | null;
   id: string;
   accountId: string;
   categoryId?: string | null;
@@ -77,6 +79,7 @@ export type Transaction = {
 
 
 export type RecurringTransactionTemplate = {
+  destinationAccountId?: string | null;
   id: string;
   accountId: string;
   categoryId?: string | null;
@@ -90,6 +93,7 @@ export type RecurringTransactionTemplate = {
 };
 
 export type RecurringTransactionTemplatePayload = {
+  destinationAccountId?: string | null;
   accountId: string;
   categoryId?: string | null;
   amount: number;
@@ -105,6 +109,9 @@ export type RecurringGenerationResult = {
 };
 
 export type MonthlyReportDraftTransaction = {
+  payeeName?: string | null;
+  reference?: string | null;
+  tags?: string | null;
   sourceId: string;
   accountId: string;
   categoryId?: string | null;

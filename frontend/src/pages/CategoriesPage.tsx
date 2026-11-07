@@ -489,7 +489,7 @@ function buildSparklineValues(transactions: Transaction[], daysInMonth: number) 
   transactions.forEach((transaction) => {
     const day = Math.max(1, Math.min(new Date(transaction.occurredOnUtc).getUTCDate(), daysInMonth));
     const index = Math.min(bucketCount - 1, Math.floor(((day - 1) / daysInMonth) * bucketCount));
-    buckets[index] += Math.abs(transaction.amount);
+    buckets[index] += (transaction.type === "Refund" ? -1 : 1) * Math.abs(transaction.amount);
   });
 
   return buckets;
@@ -598,12 +598,12 @@ export function CategoriesPage() {
   const totalsByKind = useMemo(() => {
     return monthlyTransactions.reduce(
       (totals, transaction) => {
-        if (transaction.type === "Income") {
+        if (transaction.type === "Income" && !transaction.parentTransactionId) {
           totals.Income += Math.abs(transaction.amount);
         }
 
-        if (transaction.type === "Expense") {
-          totals.Expense += Math.abs(transaction.amount);
+        if ((transaction.type === "Expense" || transaction.type === "Refund") && !transaction.parentTransactionId) {
+          totals.Expense += (transaction.type === "Refund" ? -1 : 1) * Math.abs(transaction.amount);
         }
 
         return totals;
@@ -615,10 +615,10 @@ export function CategoriesPage() {
   const categoryRows = useMemo<CategoryRow[]>(() => {
     return categories.map((category, index) => {
       const safeKind = getSafeKind(category.kind);
-      const categoryMonthlyTransactions = monthlyTransactions.filter((transaction) => transaction.categoryId === category.id);
-      const categoryAllTransactions = transactions.filter((transaction) => transaction.categoryId === category.id);
+      const categoryMonthlyTransactions = monthlyTransactions.filter((transaction) => transaction.categoryId === category.id && (transaction.parentTransactionId || !transaction.splitGroupId));
+      const categoryAllTransactions = transactions.filter((transaction) => transaction.categoryId === category.id && (transaction.parentTransactionId || !transaction.splitGroupId));
       const budgetCategory = budgetByCategory.get(category.id);
-      const amount = categoryMonthlyTransactions.reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
+      const amount = categoryMonthlyTransactions.reduce((sum, transaction) => sum + (transaction.type === "Refund" ? -1 : 1) * Math.abs(transaction.amount), 0);
       const monthlyAmount = safeKind === "Expense" && budgetCategory ? Math.max(budgetCategory.spent, amount) : amount;
       const ruleCount = rulesByCategory.get(category.id)?.length ?? 0;
       const groupId = preferences.groups[category.id] ?? getCategoryGroup(category, languageCode);

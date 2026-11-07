@@ -1,3 +1,4 @@
+using Ledgerra.Application.Reporting;
 using Ledgerra.Application.Transactions;
 using Ledgerra.Domain.Transactions;
 
@@ -15,7 +16,10 @@ public sealed record MonthlyReportDraftInput(
     decimal Amount,
     string Type,
     DateTime OccurredOnUtc,
-    string? Note);
+    string? Note,
+    string? PayeeName = null,
+    string? Reference = null,
+    string? Tags = null);
 
 public sealed record MonthlyReportDraftDuplicateReview(string SourceId, bool IsLikelyDuplicate);
 
@@ -43,13 +47,16 @@ public sealed class CommitMonthlyReportDraftsCommandHandler
 {
     private readonly IMonthlyReportDuplicateReviewer _duplicateReviewer;
     private readonly IMonthlyReportImportCommitStore _store;
+    private readonly IMonthlyAccountBalanceSnapshotService? _snapshots;
 
     public CommitMonthlyReportDraftsCommandHandler(
         IMonthlyReportImportCommitStore store,
-        IMonthlyReportDuplicateReviewer duplicateReviewer)
+        IMonthlyReportDuplicateReviewer duplicateReviewer,
+        IMonthlyAccountBalanceSnapshotService? snapshots = null)
     {
         _store = store;
         _duplicateReviewer = duplicateReviewer;
+        _snapshots = snapshots;
     }
 
     public async Task<CommitMonthlyReportDraftsResult> HandleAsync(
@@ -92,6 +99,12 @@ public sealed class CommitMonthlyReportDraftsCommandHandler
 
         var transactions = await _store.CreateTransactionsAsync(command.UserId, command.Transactions, cancellationToken);
 
+        if (_snapshots is not null)
+            foreach (var group in transactions.GroupBy(x => x.AccountId))
+            {
+                var earliest = group.Min(x => x.OccurredOnUtc);
+                await _snapshots.RefreshFromAsync(command.UserId, new DateOnly(earliest.Year, earliest.Month, 1), group.Key, cancellationToken);
+            }
         return CommitMonthlyReportDraftsResult.Success(transactions.Select(MapTransaction).ToList());
     }
 
@@ -163,7 +176,7 @@ public sealed class CommitMonthlyReportDraftsCommandHandler
         {
             return CommitMonthlyReportDraftsResult.ValidationError(
                 "type",
-                "Imported report drafts must be Income or Expense.");
+                "Imported report drafts must be Income, Expense, or Refund.");
         }
 
         if (draft.CategoryId.HasValue)
@@ -181,7 +194,7 @@ public sealed class CommitMonthlyReportDraftsCommandHandler
     private static bool TryParseSupportedTransactionType(string type, out TransactionType parsedType)
     {
         if (Enum.TryParse<TransactionType>(type, true, out parsedType) &&
-            (parsedType == TransactionType.Income || parsedType == TransactionType.Expense))
+            (parsedType == TransactionType.Income || parsedType == TransactionType.Expense || parsedType == TransactionType.Refund))
         {
             return true;
         }

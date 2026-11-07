@@ -1,3 +1,4 @@
+import { BookkeepingPage } from "./pages/BookkeepingPage";
 import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./ui/AppShell";
@@ -34,6 +35,7 @@ function ProtectedRoutes() {
               <Route path="/transactions" element={<TransactionsPage />} />
               <Route path="/recurring" element={<RecurringTransactionsPage />} />
               <Route path="/imports" element={<ImportsPage />} />
+              <Route path="/bookkeeping" element={<BookkeepingPage />} />
               <Route path="/accounts" element={<AccountsPage />} />
               <Route path="/accounts/:accountId" element={<AccountsPage />} />
               <Route path="/budgets" element={<BudgetsPage />} />

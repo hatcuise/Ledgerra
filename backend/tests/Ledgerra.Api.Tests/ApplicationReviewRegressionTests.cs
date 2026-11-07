@@ -248,6 +248,8 @@ public sealed class ApplicationReviewRegressionTests
             return Task.FromResult(AccountExists);
         }
 
+        public Task<bool> AccountsShareCurrencyAsync(Guid userId, Guid sourceAccountId, Guid destinationAccountId, CancellationToken cancellationToken) => Task.FromResult(true);
+
         public Task<bool> CategoryExistsAsync(Guid userId, Guid categoryId, CancellationToken cancellationToken)
         {
             return Task.FromResult(true);

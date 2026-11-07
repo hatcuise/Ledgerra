@@ -11,6 +11,7 @@ import { formatCurrency } from "../utils/format";
 import { getLocaleForLanguageCode } from "../utils/language";
 
 type FormValues = {
+  destinationAccountId: string;
   accountId: string;
   categoryId: string;
   amount: string;
@@ -22,6 +23,7 @@ type FormValues = {
 };
 
 const defaultValues: FormValues = {
+  destinationAccountId: "",
   accountId: "",
   categoryId: "",
   amount: "0",
@@ -62,6 +64,7 @@ function parseAmount(value: string) {
 
 function templateToValues(template: RecurringTransactionTemplate): FormValues {
   return {
+    destinationAccountId: template.destinationAccountId ?? "",
     accountId: template.accountId,
     categoryId: template.categoryId ?? "",
     amount: String(template.amount),
@@ -77,6 +80,7 @@ function buildPayload(values: FormValues): RecurringTransactionTemplatePayload {
   const amount = parseAmount(values.amount);
 
   return {
+    destinationAccountId: values.type === "Transfer" ? values.destinationAccountId || null : null,
     accountId: values.accountId,
     categoryId: values.categoryId || null,
     amount,
@@ -93,7 +97,7 @@ function getTemplateLabel(template: RecurringTransactionTemplate) {
 }
 
 function getCategoryOptions(categories: Category[], type: string) {
-  return categories.filter((category) => category.kind === type);
+  return categories.filter((category) => category.kind === (type === "Refund" ? "Expense" : type));
 }
 
 export function RecurringTransactionsPage() {
@@ -282,6 +286,8 @@ export function RecurringTransactionsPage() {
                 <select value={values.type} onChange={(event) => updateValue("type", event.target.value)}>
                   <option value="Expense">Expense</option>
                   <option value="Income">Income</option>
+                  <option value="Refund">Refund</option>
+                  <option value="Transfer">Transfer</option>
                 </select>
               </label>
               <label>
@@ -292,6 +298,7 @@ export function RecurringTransactionsPage() {
                 </select>
               </label>
             </div>
+            {values.type === "Transfer" && <label>Destination account<select required value={values.destinationAccountId} onChange={event => updateValue("destinationAccountId", event.target.value)}><option value="">Choose destination</option>{accounts.filter(a => a.id !== values.accountId).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></label>}
             <label>
               Category
               <select value={values.categoryId} onChange={(event) => updateValue("categoryId", event.target.value)}>

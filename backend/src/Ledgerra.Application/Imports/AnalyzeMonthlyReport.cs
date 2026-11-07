@@ -32,7 +32,11 @@ public sealed record AnalyzedMonthlyReportDraft(
     bool IsLikelyDuplicate,
     Guid? DuplicateTransactionId,
     string? DuplicateReason,
-    bool IsSelectedByDefault);
+    bool IsSelectedByDefault,
+    string? PayeeName = null,
+    string? Reference = null,
+    string? Tags = null,
+    string? CategoryName = null);
 
 public sealed record AnalyzeMonthlyReportResult(
     IReadOnlyList<AnalyzedMonthlyReportDraft> Transactions,

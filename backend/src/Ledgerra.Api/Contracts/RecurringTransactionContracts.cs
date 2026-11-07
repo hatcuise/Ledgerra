@@ -5,6 +5,7 @@ namespace Ledgerra.Api.Contracts;
 public sealed class CreateRecurringTransactionTemplateRequest
 {
     [Required] public Guid AccountId { get; init; }
+    public Guid? DestinationAccountId { get; init; }
     public Guid? CategoryId { get; init; }
     [Range(0.01, 999999999)] public decimal Amount { get; init; }
     [Required] public string Type { get; init; } = string.Empty;
@@ -16,6 +17,7 @@ public sealed class CreateRecurringTransactionTemplateRequest
 public sealed class UpdateRecurringTransactionTemplateRequest
 {
     [Required] public Guid AccountId { get; init; }
+    public Guid? DestinationAccountId { get; init; }
     public Guid? CategoryId { get; init; }
     [Range(0.01, 999999999)] public decimal Amount { get; init; }
     [Required] public string Type { get; init; } = string.Empty;
@@ -40,4 +42,5 @@ public sealed record RecurringTransactionTemplateResponse(
     DateTime StartOnUtc,
     DateTime? LastGeneratedOnUtc,
     bool IsActive,
-    string? Note);
+    string? Note,
+    Guid? DestinationAccountId = null);

@@ -1,4 +1,5 @@
 using Ledgerra.Domain.Accounts;
+using Ledgerra.Domain.Bookkeeping;
 using Ledgerra.Domain.Ai;
 using Ledgerra.Domain.Auth;
 using Ledgerra.Domain.Budgets;
@@ -48,8 +49,17 @@ public sealed class LedgerraDbContext : DbContext
 
     public DbSet<UserExchangeRate> ExchangeRates => Set<UserExchangeRate>();
 
+    public DbSet<ImportProfile> ImportProfiles => Set<ImportProfile>();
+    public DbSet<Payee> Payees => Set<Payee>();
+    public DbSet<EntryMetadata> EntryMetadata => Set<EntryMetadata>();
+    public DbSet<Reconciliation> Reconciliations => Set<Reconciliation>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ImportProfile>(b => { b.HasKey(x => x.Id); b.Property(x => x.Name).HasMaxLength(120); b.Property(x => x.SettingsJson).HasMaxLength(8000); b.HasIndex(x => new { x.UserId, x.Name }).IsUnique(); });
+        modelBuilder.Entity<Payee>(b => { b.HasKey(x => x.Id); b.Property(x => x.Name).HasMaxLength(120); b.HasIndex(x => new { x.UserId, x.Name }).IsUnique(); });
+        modelBuilder.Entity<EntryMetadata>(b => { b.HasKey(x => x.Id); b.Property(x => x.Reference).HasMaxLength(120); b.Property(x => x.Tags).HasMaxLength(400); b.Property(x => x.Status).HasMaxLength(20); b.HasOne<Transaction>().WithMany().HasForeignKey(x => x.Id).OnDelete(DeleteBehavior.Cascade); });
+        modelBuilder.Entity<Reconciliation>(b => { b.HasKey(x => x.Id); b.Property(x => x.StatementBalance).HasPrecision(18, 2); b.HasIndex(x => new { x.UserId, x.AccountId, x.StatementDate }).IsUnique(); });
         modelBuilder.Entity<AppUser>(builder =>
         {
             builder.HasKey(user => user.Id);
@@ -148,6 +158,7 @@ public sealed class LedgerraDbContext : DbContext
         modelBuilder.Entity<RecurringTransactionTemplate>(builder =>
         {
             builder.HasKey(template => template.Id);
+            builder.HasOne<Account>().WithMany().HasForeignKey(template => template.DestinationAccountId).OnDelete(DeleteBehavior.Restrict);
             builder.Property(template => template.Amount).HasPrecision(18, 2);
             builder.Property(template => template.Note).HasMaxLength(400);
             builder.Property(template => template.Type).HasConversion<string>().HasMaxLength(32);

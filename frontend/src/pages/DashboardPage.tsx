@@ -147,7 +147,7 @@ function buildDashboardInsights(
   const insights: DashboardInsight[] = [];
   const budgetCategories = budget?.categories ?? [];
   const hasBudget = (budget?.totalPlanned ?? 0) > 0 || budgetCategories.some((category) => category.planned > 0);
-  const expenseTransactions = transactions.filter((transaction) => transaction.type === "Expense");
+  const expenseTransactions = transactions.filter((transaction) => (transaction.type === "Expense" || transaction.type === "Refund") && !transaction.parentTransactionId);
   const uncategorizedExpenseCount = expenseTransactions.filter((transaction) => !transaction.categoryId).length;
 
   budgetCategories

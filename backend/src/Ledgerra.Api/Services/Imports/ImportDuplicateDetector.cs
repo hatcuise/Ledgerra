@@ -48,12 +48,15 @@ public sealed class ImportDuplicateDetector : IImportDuplicateDetector
                 transaction.OccurredOnUtc < maxExclusiveDate)
             .ToListAsync(cancellationToken);
 
-        if (existing.Count == 0)
+        var seen = new HashSet<(Guid, DateTime, decimal, string, string)>();
+        return drafts.Select(draft =>
         {
-            return drafts;
-        }
-
-        return drafts.Select(draft => MarkDuplicate(draft, existing)).ToList();
+            var marked = MarkDuplicate(draft, existing);
+            var key = (draft.AccountId, draft.OccurredOnUtc.ToUniversalTime().Date, draft.Amount, draft.Type.ToUpperInvariant(), NormalizeNote(draft.Note ?? ""));
+            if (!seen.Add(key) && !marked.IsLikelyDuplicate)
+                marked = marked with { IsLikelyDuplicate = true, DuplicateReason = "Matches an earlier row in this import.", IsSelectedByDefault = false };
+            return marked;
+        }).ToList();
     }
 
     private static ImportDraftReviewItem MarkDuplicate(ImportDraftReviewItem draft, IReadOnlyList<Transaction> existing)
@@ -93,7 +96,7 @@ public sealed class ImportDuplicateDetector : IImportDuplicateDetector
             return null;
         }
 
-        return parsedType is TransactionType.Income or TransactionType.Expense ? parsedType : null;
+        return parsedType is TransactionType.Income or TransactionType.Expense or TransactionType.Refund ? parsedType : null;
     }
 
     private static bool NotesMatch(string? existingNote, string? draftNote)

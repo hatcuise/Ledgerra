@@ -50,6 +50,8 @@ public interface ITransactionCommandStore
 {
     Task<bool> AccountExistsAsync(Guid userId, Guid accountId, CancellationToken cancellationToken);
 
+    Task<bool> AccountsShareCurrencyAsync(Guid userId, Guid sourceAccountId, Guid destinationAccountId, CancellationToken cancellationToken);
+
     Task<bool> CategoryExistsAsync(Guid userId, Guid categoryId, CancellationToken cancellationToken);
 
     Task<Transaction?> GetByIdAsync(Guid userId, Guid transactionId, CancellationToken cancellationToken);
@@ -209,12 +211,14 @@ public sealed class CreateTransactionCommandHandler
                 return TransactionCommandResult.NotFound("Destination account not found");
             }
 
+            if (!await _transactionCommandStore.AccountsShareCurrencyAsync(command.UserId, command.AccountId, command.DestinationAccountId.Value, cancellationToken))
+                return TransactionCommandResult.ValidationError("destinationAccountId", "Transfers require accounts in the same currency.");
             return null;
         }
 
         if (!TryParseNonTransferType(command.Type, out _))
         {
-            return TransactionCommandResult.ValidationError("type", "Supported transaction types are Income, Expense, and Transfer.");
+            return TransactionCommandResult.ValidationError("type", "Supported transaction types are Income, Expense, Refund, and Transfer.");
         }
 
         if (command.SplitLines is { Count: > 0 })
@@ -249,7 +253,7 @@ public sealed class CreateTransactionCommandHandler
     private static bool TryParseNonTransferType(string type, out TransactionType parsedType)
     {
         if (Enum.TryParse<TransactionType>(type, true, out parsedType) &&
-            (parsedType == TransactionType.Income || parsedType == TransactionType.Expense))
+            (parsedType == TransactionType.Income || parsedType == TransactionType.Expense || parsedType == TransactionType.Refund))
         {
             return true;
         }

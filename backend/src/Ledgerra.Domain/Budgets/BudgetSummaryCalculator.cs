@@ -11,12 +11,12 @@ public static class BudgetSummaryCalculator
             {
                 var spent = transactions
                     .Where(transaction =>
-                        transaction.Type == TransactionType.Expense &&
+                        TransactionSemantics.IsSpending(transaction) &&
                         transaction.CategoryId == limit.CategoryId &&
                         (transaction.ParentTransactionId.HasValue || !transaction.SplitGroupId.HasValue) &&
                         transaction.OccurredOnUtc.Year == period.Year &&
                         transaction.OccurredOnUtc.Month == period.Month)
-                    .Sum(transaction => transaction.Amount);
+                    .Sum(TransactionSemantics.SpendingAmount);
 
                 var carryForward = 0m;
                 if (limit.CarryOverUnspent && carryForwardByCategory is not null)
