@@ -97,7 +97,7 @@ public sealed class LedgerToolsTests(LedgerraApiFactory factory) : IClassFixture
         Assert.Empty((await other.GetFromJsonAsync<JsonElement>("/api/bookkeeping/views")).EnumerateArray());
         Assert.Equal(HttpStatusCode.NotFound, (await other.DeleteAsync($"/api/bookkeeping/views/{Id(view)}")).StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, (await c.PostAsJsonAsync("/api/bookkeeping/views", new { name = "Bad", query = "https://example.com" })).StatusCode);
-        var backup = await c.GetFromJsonAsync<JsonElement>("/api/backup/export"); Assert.Equal(6, backup.GetProperty("version").GetInt32()); (await c.PostAsJsonAsync("/api/backup/restore", backup)).EnsureSuccessStatusCode();
+        var backup = await c.GetFromJsonAsync<JsonElement>("/api/backup/export"); Assert.Equal(7, backup.GetProperty("version").GetInt32()); (await c.PostAsJsonAsync("/api/backup/restore", backup)).EnsureSuccessStatusCode();
         Assert.Equal("?type=Expense&q=Market", (await c.GetFromJsonAsync<JsonElement>("/api/bookkeeping/views"))[0].GetProperty("query").GetString());
     }
 

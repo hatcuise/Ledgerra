@@ -124,6 +124,7 @@ export function TransactionsPage() {
       : new URLSearchParams(window.location.search),
     []
   );
+  const [focusedEntryId, setFocusedEntryId] = useState(() => liveQuery.get("entry") ?? "");
   const initialFormFromQuery = liveQuery.get("form");
   const initialFormAccountId = liveQuery.get("accountId");
   const initialFormSavingsGoalId = liveQuery.get("savingsGoalId");
@@ -134,6 +135,7 @@ export function TransactionsPage() {
   }));
   const [filterAccountIds, setFilterAccountIds] = useState<string[]>(() => initialQuery.getAll("accountId"));
   const [filterCategoryIds, setFilterCategoryIds] = useState<string[]>(() => initialQuery.getAll("categoryId"));
+  const [filterTimeZone, setFilterTimeZone] = useState(() => initialQuery.get("timeZone") ?? "");
   const [filterType, setFilterType] = useState(() => initialQuery.get("type") ?? "");
   const [fromDate, setFromDate] = useState(() => initialQuery.get("from") ?? "");
   const [toDate, setToDate] = useState(() => initialQuery.get("to") ?? "");
@@ -161,6 +163,7 @@ export function TransactionsPage() {
 
   const filterQuery = useMemo(() => {
     const params = new URLSearchParams();
+    if (filterTimeZone) params.set("timeZone", filterTimeZone);
     filterAccountIds.forEach((id) => params.append("accountId", id));
     if (filterType !== "Transfer") {
       filterCategoryIds.forEach((id) => params.append("categoryId", id));
@@ -189,10 +192,11 @@ export function TransactionsPage() {
 
     const query = params.toString();
     return query ? `?${query}` : "";
-  }, [filterAccountIds, filterCategoryIds, filterType, fromDate, toDate, minAmount, maxAmount, noteSearch, showUncategorizedOnly]);
+  }, [filterAccountIds, filterCategoryIds, filterType, fromDate, toDate, minAmount, maxAmount, noteSearch, showUncategorizedOnly, filterTimeZone]);
 
   useEffect(() => {
     const params = new URLSearchParams();
+    if (filterTimeZone) params.set("timeZone", filterTimeZone);
     filterAccountIds.forEach((id) => params.append("accountId", id));
     if (filterType !== "Transfer") {
       filterCategoryIds.forEach((id) => params.append("categoryId", id));
@@ -206,7 +210,7 @@ export function TransactionsPage() {
     if (showUncategorizedOnly) params.set("view", "uncategorized");
     const query = params.toString();
     window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
-  }, [filterAccountIds, filterCategoryIds, filterType, fromDate, toDate, minAmount, maxAmount, noteSearch, showUncategorizedOnly]);
+  }, [filterAccountIds, filterCategoryIds, filterType, fromDate, toDate, minAmount, maxAmount, noteSearch, showUncategorizedOnly, filterTimeZone]);
 
   const loadTransactions = useCallback(async () => {
     if (!auth?.accessToken) {
@@ -231,7 +235,7 @@ export function TransactionsPage() {
     const min = minAmount ? Number(minAmount) : null;
     const max = maxAmount ? Number(maxAmount) : null;
     return ledgerTransactions.filter((transaction) => {
-      if (transaction.parentTransactionId) return false;
+      if (transaction.parentTransactionId || (focusedEntryId && transaction.id !== focusedEntryId)) return false;
       if (filterType === "Transfer" && !transaction.type.startsWith("Transfer")) {
         return false;
       }
@@ -258,7 +262,7 @@ export function TransactionsPage() {
 
       return (transaction.note ?? "").toLowerCase().includes(normalizedSearch);
     });
-  }, [filterType, filterAccountIds, filterCategoryIds, ledgerTransactions, minAmount, maxAmount, noteSearch, showUncategorizedOnly]);
+  }, [filterType, filterAccountIds, filterCategoryIds, ledgerTransactions, minAmount, maxAmount, noteSearch, showUncategorizedOnly, focusedEntryId]);
   useEffect(() => {
     setSelectedTransactionIds((current) => current.filter((id) => visibleTransactions.some((transaction) => transaction.id === id)));
   }, [visibleTransactions]);
@@ -360,6 +364,7 @@ export function TransactionsPage() {
   };
 
   const clearFilters = () => {
+    setFilterTimeZone(""); setFocusedEntryId("");
     setFilterAccountIds([]);
     setFilterCategoryIds([]);
     setFilterType("");
@@ -651,6 +656,7 @@ export function TransactionsPage() {
             </article>
           </div>
 
+          {focusedEntryId && <p role="status">Showing the transaction linked from a spending alert. <button type="button" onClick={() => setFocusedEntryId("")}>Show all matching transactions</button></p>}
           {errorMessage ? <p className="error-banner">{errorMessage}</p> : null}
           {statusMessage ? <p className="success-banner">{statusMessage}</p> : null}
           {isEntryOpen ? (
@@ -937,6 +943,7 @@ export function TransactionsPage() {
 
           <div id="transaction-filter-content" className="transaction-settings-content" hidden={filtersCollapsed}>
           {auth?.accessToken && <SavedLedgerViews token={auth.accessToken} onApply={params => {
+            setFilterTimeZone(params.get("timeZone") ?? ""); setFocusedEntryId("");
             setFilterAccountIds(params.getAll("accountId")); setFilterCategoryIds(params.getAll("categoryId"));
             setFilterType(params.get("type") ?? ""); setFromDate(params.get("from") ?? ""); setToDate(params.get("to") ?? "");
             setMinAmount(params.get("minAmount") ?? ""); setMaxAmount(params.get("maxAmount") ?? ""); setNoteSearch(params.get("q") ?? "");
@@ -1010,6 +1017,7 @@ export function TransactionsPage() {
             ) : null}
           </div>
 
+          {filterTimeZone && <p className="form-helper">Date filters use {filterTimeZone}.</p>}
           <div className="transaction-filter-section">
             <span className="transaction-filter-label">{t("transactions.dateRange")}</span>
             <div className="transaction-filter-grid">

@@ -47,8 +47,16 @@ public sealed class TransactionsController : ControllerBase
         decimal? maxAmount,
         string? q,
         bool uncategorizedOnly,
+        [FromQuery] string? timeZone,
         CancellationToken cancellationToken)
     {
+        TimeZoneInfo? zone = null;
+        if (!string.IsNullOrWhiteSpace(timeZone))
+        {
+            try { zone = TimeZoneInfo.FindSystemTimeZoneById(timeZone); }
+            catch (Exception e) when (e is TimeZoneNotFoundException or InvalidTimeZoneException) { return BadRequest(new ProblemDetails { Title = "Invalid transaction filter time zone." }); }
+            if (from.HasValue && from.Value.Year is < 1900 or > 9998 || to.HasValue && to.Value.Year is < 1900 or > 9998) return BadRequest();
+        }
         var transactions = await _getTransactionsQueryHandler.HandleAsync(
             new GetTransactionsQuery(
                 User.GetRequiredUserId(),
@@ -60,7 +68,7 @@ public sealed class TransactionsController : ControllerBase
                 minAmount,
                 maxAmount,
                 q,
-                uncategorizedOnly),
+                uncategorizedOnly, zone),
             cancellationToken);
 
         return Ok(transactions.Select(MapTransaction));

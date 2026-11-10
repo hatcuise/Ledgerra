@@ -1,3 +1,4 @@
+using Ledgerra.Domain.Insights;
 using Ledgerra.Domain.Bookkeeping;
 using Ledgerra.Domain.Transactions;
 using Ledgerra.Domain.Imports;
@@ -21,7 +22,9 @@ public sealed record BackupArchiveResponse(
     IReadOnlyList<CategorizationRule>? CategorizationRules = null,
     IReadOnlyList<UserExchangeRate>? ExchangeRates = null,
     IReadOnlyList<TransferMatch>? TransferMatches = null,
-    IReadOnlyList<SavedLedgerView>? SavedLedgerViews = null);
+    IReadOnlyList<SavedLedgerView>? SavedLedgerViews = null,
+    InsightPreferences? InsightPreferences = null,
+    IReadOnlyList<InsightDismissal>? InsightDismissals = null);
 
 public sealed record BackupAccountResponse(
     Guid Id,

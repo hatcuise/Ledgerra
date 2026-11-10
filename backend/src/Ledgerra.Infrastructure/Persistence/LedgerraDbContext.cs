@@ -1,3 +1,4 @@
+using Ledgerra.Domain.Insights;
 using Ledgerra.Domain.Accounts;
 using Ledgerra.Domain.Bookkeeping;
 using Ledgerra.Domain.Ai;
@@ -50,6 +51,8 @@ public sealed class LedgerraDbContext : DbContext
     public DbSet<UserExchangeRate> ExchangeRates => Set<UserExchangeRate>();
 
     public DbSet<TransferMatch> TransferMatches => Set<TransferMatch>();
+    public DbSet<InsightPreferences> InsightPreferences => Set<InsightPreferences>();
+    public DbSet<InsightDismissal> InsightDismissals => Set<InsightDismissal>();
     public DbSet<BankProviderSettings> BankProviderSettings => Set<BankProviderSettings>();
     public DbSet<BankConnection> BankConnections => Set<BankConnection>();
     public DbSet<ConnectedBankAccount> ConnectedBankAccounts => Set<ConnectedBankAccount>();
@@ -62,6 +65,13 @@ public sealed class LedgerraDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<InsightPreferences>(b =>
+        {
+            b.HasKey(x => x.UserId);
+            foreach (var property in typeof(InsightPreferences).GetProperties().Where(x => x.PropertyType == typeof(decimal)))
+                b.Property(property.Name).HasPrecision(18, 2);
+        });
+        modelBuilder.Entity<InsightDismissal>(b => { b.HasKey(x => x.Id); b.Property(x => x.AlertKey).HasMaxLength(64); b.Property(x => x.Month).HasMaxLength(7); b.HasIndex(x => new { x.UserId, x.AlertKey }).IsUnique(); });
         modelBuilder.Entity<BankProviderSettings>(b => { b.HasKey(x => x.UserId); b.Property(x => x.ClientId).HasMaxLength(200); b.Property(x => x.EncryptedSecret).HasMaxLength(4096); b.Property(x => x.Environment).HasMaxLength(20); b.Property(x => x.Country).HasMaxLength(2); b.Property(x => x.RedirectUri).HasMaxLength(2048); });
         modelBuilder.Entity<BankConnection>(b => { b.HasKey(x => x.Id); b.HasOne<BankProviderSettings>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict); b.HasIndex(x => new { x.UserId, x.ItemId }).IsUnique(); b.Property(x => x.ItemId).HasMaxLength(200); b.Property(x => x.EncryptedAccessToken).HasMaxLength(4096); b.Property(x => x.Environment).HasMaxLength(20); b.Property(x => x.Name).HasMaxLength(120); b.Property(x => x.Cursor).HasMaxLength(4096); });
         modelBuilder.Entity<ConnectedBankAccount>(b => { b.HasKey(x => x.Id); b.HasOne<BankConnection>().WithMany().HasForeignKey(x => x.ConnectionId).OnDelete(DeleteBehavior.Cascade); b.HasOne<Account>().WithMany().HasForeignKey(x => x.LedgerAccountId).OnDelete(DeleteBehavior.SetNull); b.HasIndex(x => new { x.UserId, x.LedgerAccountId }).IsUnique().HasFilter("\"LedgerAccountId\" IS NOT NULL"); b.HasIndex(x => new { x.ConnectionId, x.ProviderAccountId }).IsUnique(); b.Property(x => x.ProviderAccountId).HasMaxLength(200); b.Property(x => x.Name).HasMaxLength(120); b.Property(x => x.Mask).HasMaxLength(8); b.Property(x => x.Currency).HasMaxLength(3); b.Property(x => x.Type).HasMaxLength(40); b.Property(x => x.ReportedBalance).HasPrecision(18, 2); });

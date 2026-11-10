@@ -90,7 +90,7 @@ public sealed class BookkeepingWorkflowTests : IClassFixture<LedgerraApiFactory>
         (await client.PostAsJsonAsync("/api/bookkeeping/payees", new { name = "Market" })).EnsureSuccessStatusCode();
         var profiles = await other.GetFromJsonAsync<JsonElement>("/api/bookkeeping/profiles"); Assert.Empty(profiles.EnumerateArray());
         var backup = await client.GetFromJsonAsync<JsonElement>("/api/backup/export");
-        Assert.Equal(6, backup.GetProperty("version").GetInt32()); Assert.Single(backup.GetProperty("importProfiles").EnumerateArray()); Assert.Single(backup.GetProperty("payees").EnumerateArray());
+        Assert.Equal(7, backup.GetProperty("version").GetInt32()); Assert.Single(backup.GetProperty("importProfiles").EnumerateArray()); Assert.Single(backup.GetProperty("payees").EnumerateArray());
         (await client.PostAsJsonAsync("/api/backup/restore", backup)).EnsureSuccessStatusCode();
         Assert.Single((await client.GetFromJsonAsync<JsonElement>("/api/bookkeeping/profiles")).EnumerateArray());
     }

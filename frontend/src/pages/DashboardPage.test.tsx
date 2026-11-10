@@ -1,3 +1,4 @@
+import { spendingInsights, insightAlert } from "../test/insightFixtures";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -7,6 +8,7 @@ import { MonthProvider } from "../state/MonthContext";
 import type { Account, BudgetSummary, DashboardSummary, Transaction } from "../types";
 
 const mocks = vi.hoisted(() => ({
+  insights: vi.fn(),
   createCategory: vi.fn(),
   createTransaction: vi.fn(),
   data: {
@@ -51,6 +53,7 @@ vi.mock("../state/AuthContext", () => ({
 vi.mock("../api/client", () => ({
   apiClient: {
     bookkeeping: vi.fn().mockResolvedValue([]),
+    insights: mocks.insights,
     createCategory: mocks.createCategory,
     createTransaction: mocks.createTransaction
   }
@@ -78,6 +81,7 @@ describe("DashboardPage", () => {
   beforeEach(() => {
     cleanup();
     vi.clearAllMocks();
+    mocks.insights.mockResolvedValue(spendingInsights());
     localStorage.clear();
     mocks.createTransaction.mockResolvedValue({ id: "transaction-new" });
     mocks.createCategory.mockResolvedValue({
@@ -261,7 +265,8 @@ describe("DashboardPage", () => {
     expect(screen.queryByLabelText("Onboarding checklist")).not.toBeInTheDocument();
   });
 
-  test("shows actionable insights for budget pressure and uncategorized transactions", () => {
+  test("shows actionable insights for budget pressure and uncategorized transactions", async () => {
+    mocks.insights.mockResolvedValue(spendingInsights({ alerts: [insightAlert({ title: "Dining is nearing its budget" }), insightAlert({ key: "B".repeat(64), title: "Subscriptions is over budget" })] }));
     mocks.data.dashboard = {
       income: 4000,
       expenses: 1240,
@@ -339,8 +344,8 @@ describe("DashboardPage", () => {
     renderDashboardPage();
 
     expect(screen.getByRole("heading", { name: "Insights" })).toBeInTheDocument();
-    expect(screen.getByText("Dining is 82% of its budget.")).toBeInTheDocument();
-    expect(screen.getByText("Subscriptions is over budget by $5.00.")).toBeInTheDocument();
+    expect(await screen.findByText("Dining is nearing its budget")).toBeInTheDocument();
+    expect(screen.getByText("Subscriptions is over budget")).toBeInTheDocument();
     expect(screen.getByText("You have 2 uncategorized expense transactions.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Review transactions" })).toHaveAttribute("href", "/transactions?view=uncategorized&from=2026-05-01&to=2026-05-31");
   });

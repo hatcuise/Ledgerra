@@ -5467,7 +5467,7 @@ label {
   }
 
   .content {
-    padding-bottom: 5rem;
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
 
   .mobile-nav {
@@ -5477,7 +5477,9 @@ label {
     bottom: 0;
     z-index: 40;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(4.6rem, 1fr);
     gap: 0.2rem;
     border-top: 1px solid var(--border);
     background: var(--surface-overlay);
@@ -7503,3 +7505,32 @@ label {
 .bookkeeping-page input[type=checkbox], .csv-import-settings input[type=checkbox] { width: auto; }
 
 .transfer-candidate { border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-block: .75rem; }
+
+/* Spending insights */
+.insight-context { display: flex; flex-wrap: wrap; gap: .6rem 1.5rem; align-items: center; color: var(--text-muted); }
+.insight-chart { width: 100%; min-width: 0; margin: 1rem 0; }
+.insight-breakdowns { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1.25rem; }
+.insight-breakdowns > *, .insights-page .section-card { min-width: 0; }
+.insight-coverage { padding: 1rem; border: 1px solid #d5943c; border-radius: 12px; }
+.spending-alert-list, .insight-summary-list { display: grid; gap: 1rem; }
+.spending-alert { padding: 1rem; border: 1px solid var(--border-color, #7b8a8738); border-left: 4px solid #d5943c; border-radius: 10px; }
+.spending-alert--warning { border-left-color: #d35e53; }
+.spending-alert h3 { margin: .35rem 0; }
+.spending-alert p { margin: .5rem 0; }
+.insight-alert-values { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin: 1rem 0; }
+.insight-alert-values dt { font-size: .8rem; opacity: .75; }
+.insight-alert-values dd { margin: .25rem 0 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.insight-preference-toggles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.insight-preference-toggles label { display: flex; flex-direction: row; align-items: center; gap: .5rem; }
+.insight-preference-toggles input[type=checkbox] { width: auto; }
+.insights-page fieldset { min-width: 0; border: 0; padding: 0; }
+.insights-page td, .insights-page th { padding: .7rem; text-align: left; font-variant-numeric: tabular-nums; }
+.insights-page .table-scroll { max-width: 100%; overflow-x: auto; }
+@media (max-width: 900px) { .insight-breakdowns { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .insight-preference-toggles { grid-template-columns: minmax(0, 1fr); } .insight-alert-values { gap: .75rem; } }
+.insight-page-actions { display: flex; align-items: end; flex-wrap: wrap; gap: .75rem; }
+.insight-page-actions label { display: grid; gap: .35rem; font-size: .85rem; }
+.insight-page-actions input { min-width: 0; max-width: 100%; }
+
+.insight-dismissed-toggle { display: inline-flex; flex-direction: row; align-items: center; gap: .5rem; }
+.insight-dismissed-toggle input[type=checkbox] { width: auto; }

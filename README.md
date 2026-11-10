@@ -446,3 +446,10 @@ US and Canadian deposit/card accounts can connect through Plaid under Imports.
 Bring your own Plaid application credentials; Sandbox uses test banks, while real
 banks require Production access. Downloaded entries are reviewed before posting.
 See [browser setup and Synology requirements](docs/bank-connections.md).
+
+### Spending insights and alerts
+
+**Insights** adds Mint-style spending comparisons, budget warnings, unusual/large
+purchase alerts, spending pace and saved alert preferences. It uses your existing
+ledger without AI or bank-provider credentials. See the
+[calculation and alert guide](docs/spending-insights.md).

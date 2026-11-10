@@ -612,6 +612,9 @@ export const apiClient = {
 
   getImportProfiles(token: string) { return request<CsvProfile[]>("/api/bookkeeping/profiles", { token }); },
   saveImportProfile(token: string, payload: unknown) { return request<CsvProfile>("/api/bookkeeping/profiles", { token, method: "POST", body: payload }); },
+  insights<T>(token: string, path = "", method = "GET", payload?: unknown) {
+    return request<T>(`/api/insights${path}`, { token, method, ...(payload === undefined ? {} : { body: payload }) });
+  },
   banks<T>(token: string, path: string, method = "GET", payload?: unknown) {
     return request<T>(`/api/banks/${path}`, { token, method, ...(payload === undefined ? {} : { body: payload }) });
   },

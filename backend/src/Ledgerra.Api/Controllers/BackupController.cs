@@ -35,7 +35,7 @@ public sealed class BackupController : ControllerBase
         var savingsGoals = await _dbContext.SavingsGoals.Where(x => x.UserId == userId).OrderBy(x => x.CreatedAtUtc).ToListAsync(cancellationToken);
 
         return Ok(new BackupArchiveResponse(
-            6,
+            7,
             DateTimeOffset.UtcNow.ToString("O"),
             accounts.Select(x => new BackupAccountResponse(x.Id, x.Name, x.Type.ToString(), x.CurrencyCode, x.OpeningBalance, x.IsActive, x.InstitutionName, x.AccountNumberMasked, x.IconKind.ToString(), x.ExcludeFromBudget, x.ExcludeFromNetWorth)).ToList(),
             categories.Select(x => new BackupCategoryResponse(x.Id, x.Name, x.Kind.ToString(), x.Color, x.ParentCategoryId)).ToList(),
@@ -54,7 +54,9 @@ public sealed class BackupController : ControllerBase
             await _dbContext.CategorizationRules.AsNoTracking().Where(x => x.UserId == userId).ToListAsync(cancellationToken),
             await _dbContext.ExchangeRates.Where(x => x.UserId == userId).ToListAsync(cancellationToken),
             await _dbContext.TransferMatches.Where(x => x.UserId == userId).ToListAsync(cancellationToken),
-            await _dbContext.SavedLedgerViews.Where(x => x.UserId == userId).ToListAsync(cancellationToken)));
+            await _dbContext.SavedLedgerViews.Where(x => x.UserId == userId).ToListAsync(cancellationToken),
+            await _dbContext.InsightPreferences.AsNoTracking().SingleOrDefaultAsync(x => x.UserId == userId, cancellationToken),
+            await _dbContext.InsightDismissals.AsNoTracking().Where(x => x.UserId == userId).ToListAsync(cancellationToken)));
 
     }
 
@@ -63,7 +65,7 @@ public sealed class BackupController : ControllerBase
     {
         var userId = User.GetRequiredUserId();
 
-        if (archive.Version is < 2 or > 6)
+        if (archive.Version is < 2 or > 7)
         {
             return BadRequest(new ProblemDetails { Title = "Unsupported backup archive version." });
         }
@@ -89,6 +91,8 @@ public sealed class BackupController : ControllerBase
         var budgetPeriodIds = _dbContext.BudgetPeriods.Where(x => x.UserId == userId).Select(x => x.Id);
         _dbContext.BudgetCategoryLimits.RemoveRange(_dbContext.BudgetCategoryLimits.Where(x => budgetPeriodIds.Contains(x.BudgetPeriodId)));
         _dbContext.BudgetPeriods.RemoveRange(_dbContext.BudgetPeriods.Where(x => x.UserId == userId));
+        _dbContext.InsightDismissals.RemoveRange(_dbContext.InsightDismissals.Where(x => x.UserId == userId));
+        _dbContext.InsightPreferences.RemoveRange(_dbContext.InsightPreferences.Where(x => x.UserId == userId));
         _dbContext.SavedLedgerViews.RemoveRange(_dbContext.SavedLedgerViews.Where(x => x.UserId == userId));
         _dbContext.TransferMatches.RemoveRange(_dbContext.TransferMatches.Where(x => x.UserId == userId));
         _dbContext.EntryMetadata.RemoveRange(_dbContext.EntryMetadata.Where(x => x.UserId == userId));
@@ -176,6 +180,8 @@ public sealed class BackupController : ControllerBase
         await _dbContext.BudgetPeriods.AddRangeAsync(periods, cancellationToken);
         await _dbContext.BudgetCategoryLimits.AddRangeAsync(limits, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        if (archive.InsightPreferences is { } insightPreferences) { insightPreferences.UserId = userId; _dbContext.InsightPreferences.Add(insightPreferences); }
+        foreach (var x in archive.InsightDismissals ?? []) { x.UserId = userId; _dbContext.InsightDismissals.Add(x); }
         foreach (var x in archive.SavedLedgerViews ?? []) { x.UserId = userId; _dbContext.SavedLedgerViews.Add(x); }
         foreach (var x in archive.ImportProfiles ?? []) { x.UserId = userId; _dbContext.ImportProfiles.Add(x); }
         foreach (var x in archive.Payees ?? []) { x.UserId = userId; _dbContext.Payees.Add(x); }
@@ -237,6 +243,11 @@ public sealed class BackupController : ControllerBase
 
     private static string? ValidateBookkeeping(BackupArchiveResponse a)
     {
+        if (a.InsightPreferences is not null && !a.InsightPreferences.IsValid()) return "Invalid insight preferences in backup.";
+        if ((a.InsightDismissals ?? []).GroupBy(x => x.Id).Any(g => g.Count() > 1) || (a.InsightDismissals ?? []).GroupBy(x => x.AlertKey).Any(g => g.Count() > 1)
+            || (a.InsightDismissals ?? []).Any(x => x.AlertKey is null || !System.Text.RegularExpressions.Regex.IsMatch(x.AlertKey, "^[0-9A-F]{64}$")
+                || !DateOnly.TryParseExact(x.Month + "-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date)
+                || date.Year is < 1900 or > 9998 || x.DismissedAtUtc == default || x.DismissedAtUtc.Kind != DateTimeKind.Utc)) return "Invalid insight dismissal in backup.";
         var accounts = a.Accounts.Select(x => x.Id).ToHashSet(); var categories = a.Categories.Select(x => x.Id).ToHashSet();
         var categoryMap = a.Categories.GroupBy(x => x.Id).ToDictionary(g => g.Key, g => g.First());
         foreach (var category in a.Categories)

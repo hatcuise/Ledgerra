@@ -1,3 +1,4 @@
+import { InsightsPage } from "./pages/InsightsPage";
 import { BookkeepingPage } from "./pages/BookkeepingPage";
 import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -31,6 +32,7 @@ function ProtectedRoutes() {
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/insights" element={<InsightsPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/transactions" element={<TransactionsPage />} />
               <Route path="/recurring" element={<RecurringTransactionsPage />} />

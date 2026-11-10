@@ -1,3 +1,4 @@
+import { SpendingInsightSummary } from "../components/SpendingInsightSummary";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMonthSelection } from "../state/MonthContext";
@@ -147,41 +148,8 @@ function buildDashboardInsights(
   const insights: DashboardInsight[] = [];
   const budgetCategories = budget?.categories ?? [];
   const hasBudget = (budget?.totalPlanned ?? 0) > 0 || budgetCategories.some((category) => category.planned > 0);
-  const expenseTransactions = transactions.filter((transaction) => (transaction.type === "Expense" || transaction.type === "Refund") && !transaction.parentTransactionId);
+  const expenseTransactions = transactions.filter((transaction) => (transaction.type === "Expense" || transaction.type === "Refund") && !transaction.parentTransactionId && !transaction.splitGroupId);
   const uncategorizedExpenseCount = expenseTransactions.filter((transaction) => !transaction.categoryId).length;
-
-  budgetCategories
-    .filter((category) => category.planned > 0 && category.remaining < 0)
-    .sort((left, right) => left.remaining - right.remaining)
-    .slice(0, 2)
-    .forEach((category) => {
-      insights.push({
-        id: `over-budget-${category.categoryId}`,
-        title: t("dashboard.overBudgetTitle", { category: category.categoryName }),
-        detail: t("dashboard.overBudgetDetail", { category: category.categoryName, amount: formatCurrency(Math.abs(category.remaining), currencyCode) }),
-        tone: "warning",
-        action: { label: t("dashboard.openBudgets"), to: "/budgets" }
-      });
-    });
-
-  budgetCategories
-    .filter((category) => category.planned > 0 && category.remaining >= 0)
-    .map((category) => ({
-      ...category,
-      percentUsed: Math.round((category.spent / category.planned) * 100)
-    }))
-    .filter((category) => category.percentUsed >= 80)
-    .sort((left, right) => right.percentUsed - left.percentUsed)
-    .slice(0, 2)
-    .forEach((category) => {
-      insights.push({
-        id: `budget-pressure-${category.categoryId}`,
-        title: t("dashboard.closeToLimitTitle", { category: category.categoryName }),
-        detail: t("dashboard.closeToLimitDetail", { category: category.categoryName, percent: category.percentUsed }),
-        tone: "attention",
-        action: { label: t("dashboard.openBudgets"), to: "/budgets" }
-      });
-    });
 
   if (uncategorizedExpenseCount > 0) {
     insights.push({
@@ -553,7 +521,7 @@ export function DashboardPage() {
         }
 
         if (widget.id === "insights") {
-          return insights.length > 0 ? (
+          return <div key={widget.id}><SpendingInsightSummary month={selectedMonth} revision={`${loading}:${dashboard?.expenses}:${budget?.totalRemaining}:${transactions.length}`} />{insights.length > 0 ? (
             <section className="insights-panel" aria-label={t("dashboard.insightsAria")} key={widget.id}>
               <div className="section-header">
                 <h2>{t("dashboard.insights")}</h2>
@@ -574,7 +542,7 @@ export function DashboardPage() {
                 ))}
               </div>
             </section>
-          ) : null;
+          ) : null}</div>;
         }
 
         if (widget.id === "topCategories") {

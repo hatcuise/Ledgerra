@@ -1,3 +1,4 @@
+using Ledgerra.Api.Services.Insights;
 using Ledgerra.Api.Services.Banking;
 using System.Text;
 using Ledgerra.Application.Budgets;
@@ -187,6 +188,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<TransferRecognitionService>();
 builder.Services.AddScoped<NativeStatementReader>();
 builder.Services.AddScoped<BankSyncService>();
+builder.Services.AddScoped<SpendingInsightsService>();
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHttpClient<IPlaidClient, PlaidClient>(http => http.Timeout = TimeSpan.FromSeconds(30))
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
@@ -214,6 +217,7 @@ using (var scope = app.Services.CreateScope())
     await BudgetSchemaInitializer.InitializeAsync(dbContext);
     await BookkeepingSchemaInitializer.InitializeAsync(dbContext);
     await BankSchemaInitializer.InitializeAsync(dbContext);
+    await InsightsSchemaInitializer.InitializeAsync(dbContext);
 }
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));

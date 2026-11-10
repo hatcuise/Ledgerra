@@ -112,7 +112,7 @@ public sealed class LedgerToolsController(LedgerraDbContext db) : ControllerBase
     public static bool IsValidViewQuery(string? query)
     {
         if (query is null || query.Length > 4000 || query.Contains('#') || query.Contains('\n') || query.Contains('\r') || (query.Length > 0 && !query.StartsWith('?'))) return false;
-        string[] allowed = ["accountId", "categoryId", "type", "from", "to", "minAmount", "maxAmount", "q", "view", "uncategorizedOnly"];
+        string[] allowed = ["accountId", "categoryId", "type", "from", "to", "minAmount", "maxAmount", "q", "view", "uncategorizedOnly", "timeZone"];
         return QueryHelpers.ParseQuery(query).All(x => allowed.Contains(x.Key) && x.Value.Count <= 100);
     }
 }

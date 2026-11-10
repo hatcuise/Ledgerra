@@ -23,6 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     : "";
   const navItems = [
     { to: "/dashboard", label: t("nav.dashboard"), icon: DashboardIcon },
+    { to: "/insights", label: "Insights", icon: ReportsIcon },
     { to: "/reports", label: t("nav.reports"), icon: ReportsIcon },
     { to: "/transactions", label: t("nav.transactions"), icon: TransactionsIcon },
     { to: "/recurring", label: t("nav.recurring"), icon: CalendarIcon },

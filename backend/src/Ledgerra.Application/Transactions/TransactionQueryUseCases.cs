@@ -1,3 +1,4 @@
+using Ledgerra.Domain.Insights;
 using Ledgerra.Domain.Transactions;
 
 namespace Ledgerra.Application.Transactions;
@@ -12,7 +13,8 @@ public sealed record GetTransactionsQuery(
     decimal? MinAmount,
     decimal? MaxAmount,
     string? Search,
-    bool UncategorizedOnly);
+    bool UncategorizedOnly,
+    TimeZoneInfo? TimeZone = null);
 
 public sealed record GetTransactionByIdQuery(Guid UserId, Guid TransactionId);
 
@@ -54,8 +56,8 @@ public sealed class GetTransactionsQueryHandler
             query.AccountIds,
             query.CategoryIds,
             parsedType,
-            query.From?.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
-            query.To?.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc),
+            query.From.HasValue && query.TimeZone is not null ? UserCalendar.UtcStart(query.From.Value, query.TimeZone) : query.From?.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
+            query.To.HasValue && query.TimeZone is not null ? UserCalendar.UtcStart(query.To.Value.AddDays(1), query.TimeZone).AddTicks(-1) : query.To?.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc),
             query.MinAmount,
             query.MaxAmount,
             query.Search,

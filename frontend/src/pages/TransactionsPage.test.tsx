@@ -416,4 +416,10 @@ describe("TransactionsPage", () => {
     expect(appendSpy).toHaveBeenCalledTimes(3);
     expect(await screen.findByText("Exported categories and budget data.")).toBeInTheDocument();
   });
+  test("opens the exact transaction linked by a spending alert and can show the full view", async () => {
+    window.history.replaceState(null, "", "/transactions?entry=transaction-1"); render(<TransactionsPage />);
+    expect(await screen.findByLabelText("Transaction Market")).toBeInTheDocument(); expect(screen.queryByLabelText("Transaction Payroll")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Show all matching transactions" })); expect(await screen.findByLabelText("Transaction Payroll")).toBeInTheDocument();
+  });
+
 });
